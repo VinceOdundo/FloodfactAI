@@ -8,6 +8,11 @@
  *    via [data-surface="ops"] on a route-group layout, never globally.
  * Classification colors are shared across both: they mean the same thing
  * everywhere in the product.
+ *
+ * Brand system: a deep teal-forest palette with a warm cream counterpoint —
+ * premium and grounded, never bright/startup-glossy. A serif carries display
+ * headlines (the editorial, trustworthy register); the grotesque sans carries
+ * everything functional (nav, forms, data). See docs/ARCHITECTURE.md.
  */
 
 :root {
@@ -19,6 +24,13 @@
   --brand-500: #0f6f73;
   --brand-600: #0c5a5e;
   --brand-700: #0a474a;
+  --brand-800: #123a34;
+  --brand-900: #0d2b27;
+  --brand-950: #081d1a;
+
+  --cream: #f5f0e3;
+  --cream-dim: #cddad2;
+  --sage: #6f9c8c;
 
   --verified: #b91c1c;
   --verified-bg: #fef2f2;
@@ -35,25 +47,25 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0d10;
-    --foreground: #eef1f3;
-    --surface: #12171b;
-    --surface-muted: #171d22;
-    --border: #262d33;
+    --background: #0d2b27;
+    --foreground: #eef3f1;
+    --surface: #123a34;
+    --surface-muted: #16443d;
+    --border: #1d4038;
   }
 }
 
 /* Ops surface: forced dark, regardless of system theme — this is a
    control-room, not a document, and should read the same for every operator. */
 [data-surface="ops"] {
-  --background: #0a0d10;
-  --foreground: #e7ebee;
-  --surface: #10161b;
-  --surface-muted: #161d23;
-  --border: #232b31;
-  --verified-bg: #2a1414;
-  --elevated-bg: #2a2010;
-  --false-info-bg: #1a2027;
+  --background: #081d1a;
+  --foreground: #e9f1ee;
+  --surface: #0d2b27;
+  --surface-muted: #123a34;
+  --border: #1d4038;
+  --verified-bg: #341616;
+  --elevated-bg: #332512;
+  --false-info-bg: #182421;
   color-scheme: dark;
 }
 
@@ -69,6 +81,13 @@
   --color-brand-500: var(--brand-500);
   --color-brand-600: var(--brand-600);
   --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
+
+  --color-cream: var(--cream);
+  --color-cream-dim: var(--cream-dim);
+  --color-sage: var(--sage);
 
   --color-verified: var(--verified);
   --color-verified-bg: var(--verified-bg);
@@ -80,6 +99,7 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-source-serif);
 }
 
 body {
@@ -89,4 +109,13 @@ body {
 
 * {
   border-color: var(--color-border);
+}
+
+/* Premium dark-teal hero band, used on the marketing landing page and login —
+   a soft diagonal deepening plus a radial lift behind the ripple motif, in
+   place of a flat fill. */
+.bg-hero-gradient {
+  background:
+    radial-gradient(60% 55% at 78% 30%, color-mix(in oklab, var(--brand-600) 55%, transparent), transparent),
+    linear-gradient(155deg, var(--brand-800) 0%, var(--brand-900) 55%, var(--brand-950) 100%);
 }

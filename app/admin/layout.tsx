@@ -22,15 +22,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <div data-surface="ops" className="min-h-screen bg-background font-mono text-foreground">
       <div className="flex min-h-screen">
         <aside className="hidden w-56 shrink-0 border-r border-border p-4 sm:block">
-          <Link href="/admin" className="block text-sm font-bold tracking-wide text-brand-500">
-            FLOODFACT · OPS
+          <Link href="/admin" className="block font-serif text-sm font-semibold tracking-wide text-sage">
+            FloodFact · Ops
           </Link>
           <nav className="mt-8 space-y-1">
             {NAV.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="block rounded-md px-3 py-2 text-sm text-foreground/70 hover:bg-surface-muted hover:text-foreground"
+                className="block rounded-lg px-3 py-2 text-sm text-foreground/70 transition-colors hover:bg-surface-muted hover:text-foreground"
               >
                 {item.label}
               </Link>

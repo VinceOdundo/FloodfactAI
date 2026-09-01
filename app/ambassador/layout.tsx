@@ -16,7 +16,7 @@ export default async function AmbassadorLayout({ children }: { children: ReactNo
       <RegisterServiceWorker />
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-surface px-4 py-3">
         <div>
-          <Link href="/ambassador" className="block text-base font-bold text-brand-600">
+          <Link href="/ambassador" className="block font-serif text-base font-semibold text-brand-700">
             FloodFact AI
           </Link>
           <p className="text-xs text-foreground/50">{session.pilotAreaName}</p>

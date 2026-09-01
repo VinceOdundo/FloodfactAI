@@ -20,9 +20,9 @@ export default async function AlertsPage() {
   const alerts = await getPublicAlertFeed();
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14">
-      <h1 className="text-2xl font-bold">Verified alerts</h1>
-      <p className="mt-2 text-foreground/70">
+    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6">
+      <h1 className="font-serif text-3xl font-semibold text-foreground">Verified alerts</h1>
+      <p className="mt-3 text-foreground/70">
         Every alert here has been cross-checked against real rainfall, flood-risk and historical data before
         publication. False-information corrections are sent directly to whoever reported them, not listed
         here, so debunked rumours aren&apos;t given a second life.

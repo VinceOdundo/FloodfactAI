@@ -51,13 +51,13 @@ export function QuickLogForm() {
         required
         min={0}
         inputMode="numeric"
-        className="w-full rounded-lg border border-border bg-surface p-3 text-lg focus:border-brand-500 focus:outline-none"
+        className="w-full rounded-xl border border-border bg-surface p-3 text-lg focus:border-brand-500 focus:outline-none"
       />
       <textarea
         name="notes"
         placeholder="Notes (optional)"
         rows={2}
-        className="w-full rounded-lg border border-border bg-surface p-2 text-sm focus:border-brand-500 focus:outline-none"
+        className="w-full rounded-xl border border-border bg-surface p-2 text-sm focus:border-brand-500 focus:outline-none"
       />
       {state.error && <p className="text-sm text-verified">{state.error}</p>}
       <div className="flex gap-2">

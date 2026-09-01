@@ -13,7 +13,7 @@ export default async function CaseDetailPage(props: PageProps<"/ambassador/cases
     <div className="space-y-4">
       <div>
         <p className="text-xs text-foreground/50">{new Date(report.createdAt).toLocaleString()}</p>
-        <p className="mt-1 text-lg">{report.rawText}</p>
+        <p className="mt-1 font-serif text-lg leading-snug text-foreground">{report.rawText}</p>
         {report.claimedLocationText && <p className="mt-1 text-sm text-foreground/60">{report.claimedLocationText}</p>}
       </div>
 

@@ -5,7 +5,7 @@ import { setDemoRole } from "@/lib/actions/auth";
 export function DemoRoleSwitcher() {
   return (
     <div className="space-y-3">
-      <p className="rounded-lg bg-elevated-bg px-3 py-2 text-xs font-medium text-elevated">
+      <p className="rounded-xl bg-elevated-bg px-3 py-2 text-xs font-medium text-elevated">
         Sandbox demo — no real login configured. Pick a role to preview.
       </p>
       <form action={setDemoRole.bind(null, "admin")}>

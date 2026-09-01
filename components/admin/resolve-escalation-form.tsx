@@ -22,7 +22,7 @@ export function ResolveEscalationForm({ escalationId }: { escalationId: string }
         required
         placeholder="What did you find? (required before resolving)"
         rows={2}
-        className="w-full rounded-lg border border-border bg-surface p-2 text-sm focus:border-brand-500 focus:outline-none"
+        className="w-full rounded-xl border border-border bg-surface p-2 text-sm focus:border-brand-500 focus:outline-none"
       />
       {state.error && <p className="text-xs text-verified">{state.error}</p>}
       <Button type="submit" size="sm" disabled={pending}>

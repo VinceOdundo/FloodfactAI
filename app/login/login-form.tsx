@@ -20,7 +20,7 @@ export function LoginForm() {
           name="email"
           type="email"
           required
-          className="mt-1 w-full rounded-lg border border-border bg-surface p-2.5 text-sm focus:border-brand-500 focus:outline-none"
+          className="mt-1.5 w-full rounded-xl border border-border bg-surface p-2.5 text-sm focus:border-brand-500 focus:outline-none"
         />
       </div>
       <div>
@@ -32,7 +32,7 @@ export function LoginForm() {
           name="password"
           type="password"
           required
-          className="mt-1 w-full rounded-lg border border-border bg-surface p-2.5 text-sm focus:border-brand-500 focus:outline-none"
+          className="mt-1.5 w-full rounded-xl border border-border bg-surface p-2.5 text-sm focus:border-brand-500 focus:outline-none"
         />
       </div>
       {state.error && <p className="text-sm text-verified">{state.error}</p>}

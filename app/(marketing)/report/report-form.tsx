@@ -46,8 +46,8 @@ export function ReportForm() {
 
   if (status === "done") {
     return (
-      <div className="rounded-xl border border-safe/30 bg-safe/10 p-6 text-center">
-        <p className="text-lg font-semibold text-safe">Report received.</p>
+      <div className="rounded-2xl border border-safe/30 bg-safe/10 p-6 text-center">
+        <p className="font-serif text-lg font-semibold text-safe">Report received.</p>
         <p className="mt-2 text-sm text-foreground/70">
           We&apos;re cross-checking it against current rainfall, flood-risk and historical data now. If you
           gave us a phone number, you&apos;ll get the result there.
@@ -73,7 +73,7 @@ export function ReportForm() {
           maxLength={2000}
           rows={4}
           placeholder="e.g. Water is rising fast near the railway crossing on Kanini Road"
-          className="mt-1 w-full rounded-lg border border-border bg-surface p-3 text-base focus:border-brand-500 focus:outline-none"
+          className="mt-1.5 w-full rounded-xl border border-border bg-surface p-3 text-base focus:border-brand-500 focus:outline-none"
         />
       </div>
       <div>
@@ -85,7 +85,7 @@ export function ReportForm() {
           name="claimedLocationText"
           maxLength={200}
           placeholder="e.g. Kanini Road, Mukuru kwa Reuben"
-          className="mt-1 w-full rounded-lg border border-border bg-surface p-3 text-base focus:border-brand-500 focus:outline-none"
+          className="mt-1.5 w-full rounded-xl border border-border bg-surface p-3 text-base focus:border-brand-500 focus:outline-none"
         />
       </div>
       <div>
@@ -97,7 +97,7 @@ export function ReportForm() {
           name="phoneE164"
           type="tel"
           placeholder="+254712345678"
-          className="mt-1 w-full rounded-lg border border-border bg-surface p-3 text-base focus:border-brand-500 focus:outline-none"
+          className="mt-1.5 w-full rounded-xl border border-border bg-surface p-3 text-base focus:border-brand-500 focus:outline-none"
         />
       </div>
       {status === "error" && <p className="text-sm text-verified">{errorMessage}</p>}
