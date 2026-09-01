@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/*
+ * Two design languages, one codebase:
+ *  - "Field" (public site, resident report form, ambassador PWA): warm,
+ *    high-contrast, readable in direct sunlight on cheap Android screens.
+ *  - "Ops" (admin mission-control): dark, dense, monospace-forward — applied
+ *    via [data-surface="ops"] on a route-group layout, never globally.
+ * Classification colors are shared across both: they mean the same thing
+ * everywhere in the product.
+ */
+
+:root {
+  --background: #ffffff;
+  --foreground: #10151a;
+
+  --brand-50: #eef7f7;
+  --brand-100: #d3ecec;
+  --brand-500: #0f6f73;
+  --brand-600: #0c5a5e;
+  --brand-700: #0a474a;
+
+  --verified: #b91c1c;
+  --verified-bg: #fef2f2;
+  --elevated: #b45309;
+  --elevated-bg: #fffbeb;
+  --false-info: #475569;
+  --false-info-bg: #f1f5f9;
+  --safe: #15803d;
+
+  --surface: #ffffff;
+  --surface-muted: #f6f7f8;
+  --border: #e2e5e8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0d10;
+    --foreground: #eef1f3;
+    --surface: #12171b;
+    --surface-muted: #171d22;
+    --border: #262d33;
+  }
+}
+
+/* Ops surface: forced dark, regardless of system theme — this is a
+   control-room, not a document, and should read the same for every operator. */
+[data-surface="ops"] {
+  --background: #0a0d10;
+  --foreground: #e7ebee;
+  --surface: #10161b;
+  --surface-muted: #161d23;
+  --border: #232b31;
+  --verified-bg: #2a1414;
+  --elevated-bg: #2a2010;
+  --false-info-bg: #1a2027;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+
+  --color-verified: var(--verified);
+  --color-verified-bg: var(--verified-bg);
+  --color-elevated: var(--elevated);
+  --color-elevated-bg: var(--elevated-bg);
+  --color-false-info: var(--false-info);
+  --color-false-info-bg: var(--false-info-bg);
+  --color-safe: var(--safe);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+* {
+  border-color: var(--color-border);
+}

@@ -1,0 +1,20 @@
+name: Data source health check
+
+on:
+  schedule:
+    # Every 15 minutes. GitHub Actions cron is best-effort, not exact —
+    # fine for a health indicator, not something timing-sensitive.
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the deployed health-check endpoint
+        run: |
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "APP_URL secret not set yet — nothing to deploy against. Set it once the app is deployed (see docs/SETUP.md)."
+            exit 0
+          fi
+          curl -fsS -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "${{ secrets.APP_URL }}/api/cron/health-check"
