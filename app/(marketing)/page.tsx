@@ -10,12 +10,12 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-hero-gradient pb-28 pt-16 sm:pt-20">
-        <RippleMotif className="pointer-events-none absolute -right-16 top-0 h-[560px] w-[560px] opacity-90 sm:-right-4 lg:right-10" />
+      <section className="relative overflow-hidden bg-hero-gradient pb-16 pt-16 sm:pt-20">
+        <RippleMotif className="pointer-events-none absolute -right-6 top-8 h-96 w-96 opacity-80 sm:right-6 lg:right-16" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-2xl">
             {isDemoMode() && (
-              <p className="mb-6 inline-block rounded-full border border-cream-dim/30 bg-cream/10 px-3.5 py-1.5 text-xs font-medium text-cream-dim">
+              <p className="mb-6 inline-block rounded-full border border-cream-dim/30 px-3.5 py-1.5 text-xs font-medium text-cream-dim">
                 Sandbox demo — every number on this page is illustrative, not a live measurement
               </p>
             )}
@@ -42,40 +42,38 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section className="relative mx-auto -mt-16 max-w-6xl px-4 sm:px-6">
-        <div className="grid gap-4 rounded-2xl bg-surface p-4 shadow-[0_20px_60px_-24px_rgba(8,29,26,0.35)] sm:grid-cols-4 sm:p-5">
-          <Stat value={stats.pilotAreasActive} label="Active pilot areas" />
-          <Stat value={stats.reportsTotal} label="Reports processed" />
-          <Stat value={stats.falseInformationCaught} label="False rumours caught" />
-          <Stat
-            value={stats.avgVerificationSeconds ? `${Math.round(stats.avgVerificationSeconds)}s` : "—"}
-            label="Avg. verification time"
-          />
+          <div className="relative mt-16 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-cream-dim/15 pt-8 sm:grid-cols-4">
+            <Stat value={stats.pilotAreasActive} label="Active pilot areas" />
+            <Stat value={stats.reportsTotal} label="Reports processed" />
+            <Stat value={stats.falseInformationCaught} label="False rumours caught" />
+            <Stat
+              value={stats.avgVerificationSeconds ? `${Math.round(stats.avgVerificationSeconds)}s` : "—"}
+              label="Avg. verification time"
+            />
+          </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-5xl px-4 py-20 sm:px-6">
-        <h2 className="text-center font-serif text-3xl font-semibold text-foreground">The double emergency</h2>
+        <h2 className="text-center text-2xl font-semibold tracking-tight text-foreground">The double emergency</h2>
         <p className="mx-auto mt-3 max-w-2xl text-center text-foreground/70">
           Every long-rain season, Kibera, Mathare and Mukuru face two crises at once: the flood itself,
           and the WhatsApp rumours that spread faster than any official warning.
         </p>
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           <Card>
-            <p className="font-serif text-3xl font-semibold text-verified">50%</p>
+            <p className="text-3xl font-bold text-verified">50%</p>
             <p className="mt-2 text-sm text-foreground/70">of Kibera households flooded in a single rainy season</p>
             <p className="mt-3 text-xs text-foreground/50">World Economic Forum</p>
           </Card>
           <Card>
-            <p className="font-serif text-3xl font-semibold text-elevated">72 hrs</p>
+            <p className="text-3xl font-bold text-elevated">72 hrs</p>
             <p className="mt-2 text-sm text-foreground/70">average delay before official alerts reached residents</p>
             <p className="mt-3 text-xs text-foreground/50">Kenya Red Cross, 2023</p>
           </Card>
           <Card>
-            <p className="font-serif text-3xl font-semibold text-false-info">3 in 5</p>
+            <p className="text-3xl font-bold text-false-info">3 in 5</p>
             <p className="mt-2 text-sm text-foreground/70">WhatsApp messages during the 2023 floods were unverified</p>
             <p className="mt-3 text-xs text-foreground/50">iHub Kenya Research</p>
           </Card>
@@ -84,7 +82,7 @@ export default async function HomePage() {
 
       <section className="bg-brand-50 px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-5xl">
-          <h2 className="text-center font-serif text-3xl font-semibold text-foreground">How it works</h2>
+          <h2 className="text-center text-2xl font-semibold tracking-tight text-foreground">How it works</h2>
           <div className="mt-10 grid gap-8 sm:grid-cols-4">
             <Step n={1} title="Community submits" body="A resident forwards a warning, rumour, or suspicious message via WhatsApp, SMS, or a youth ambassador." />
             <Step n={2} title="AI cross-checks" body="Real rainfall, flood-risk zones, historical records, and ground-truth reports — gathered in parallel." />
@@ -96,7 +94,7 @@ export default async function HomePage() {
 
       <section className="px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="font-serif text-3xl font-semibold text-foreground">Built with real partners in mind</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">Built with real partners in mind</h2>
           <p className="mt-3 text-foreground/70">
             Open-Meteo rainfall data, Esri ArcGIS flood-risk geography, Africa&apos;s Talking SMS, the Meta
             WhatsApp Cloud API, and Anthropic Claude for language understanding — every integration in this
@@ -110,9 +108,9 @@ export default async function HomePage() {
 
 function Stat({ value, label }: { value: string | number; label: string }) {
   return (
-    <div className="rounded-xl px-3 py-2 text-center sm:py-3">
-      <p className="font-serif text-3xl font-semibold text-brand-600">{value}</p>
-      <p className="mt-1 text-sm text-foreground/60">{label}</p>
+    <div>
+      <p className="text-3xl font-semibold text-cream">{value}</p>
+      <p className="mt-1 text-sm text-cream-dim">{label}</p>
     </div>
   );
 }
@@ -123,7 +121,7 @@ function Step({ n, title, body }: { n: number; title: string; body: string }) {
       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-cream">
         {n}
       </div>
-      <h3 className="mt-4 font-serif text-lg font-semibold text-foreground">{title}</h3>
+      <h3 className="mt-4 text-base font-semibold text-foreground">{title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-foreground/70">{body}</p>
     </div>
   );

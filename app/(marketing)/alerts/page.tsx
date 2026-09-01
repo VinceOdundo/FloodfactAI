@@ -21,7 +21,7 @@ export default async function AlertsPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold text-foreground">Verified alerts</h1>
+      <h1 className="text-3xl font-semibold tracking-tight text-foreground">Verified alerts</h1>
       <p className="mt-3 text-foreground/70">
         Every alert here has been cross-checked against real rainfall, flood-risk and historical data before
         publication. False-information corrections are sent directly to whoever reported them, not listed

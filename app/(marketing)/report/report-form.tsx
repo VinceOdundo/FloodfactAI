@@ -47,7 +47,7 @@ export function ReportForm() {
   if (status === "done") {
     return (
       <div className="rounded-2xl border border-safe/30 bg-safe/10 p-6 text-center">
-        <p className="font-serif text-lg font-semibold text-safe">Report received.</p>
+        <p className="text-lg font-semibold text-safe">Report received.</p>
         <p className="mt-2 text-sm text-foreground/70">
           We&apos;re cross-checking it against current rainfall, flood-risk and historical data now. If you
           gave us a phone number, you&apos;ll get the result there.

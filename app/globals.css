@@ -111,11 +111,8 @@ body {
   border-color: var(--color-border);
 }
 
-/* Premium dark-teal hero band, used on the marketing landing page and login —
-   a soft diagonal deepening plus a radial lift behind the ripple motif, in
-   place of a flat fill. */
+/* Dark-teal hero band, used on the marketing landing page and login — a
+   single deliberate diagonal, no soft glow/blur layered on top of it. */
 .bg-hero-gradient {
-  background:
-    radial-gradient(60% 55% at 78% 30%, color-mix(in oklab, var(--brand-600) 55%, transparent), transparent),
-    linear-gradient(155deg, var(--brand-800) 0%, var(--brand-900) 55%, var(--brand-950) 100%);
+  background: linear-gradient(155deg, var(--brand-800) 0%, var(--brand-900) 55%, var(--brand-950) 100%);
 }

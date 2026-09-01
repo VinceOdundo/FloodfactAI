@@ -19,10 +19,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             <Link href="/report" className="hidden transition-colors hover:text-cream sm:inline">
               Report a Flood
             </Link>
-            <Link
-              href="/login"
-              className="whitespace-nowrap rounded-full border border-cream-dim/30 px-3.5 py-1.5 text-cream transition-colors hover:border-cream-dim/60 hover:bg-cream/10 sm:px-4"
-            >
+            <Link href="/login" className="whitespace-nowrap text-cream transition-colors hover:text-sage">
               Staff Login
             </Link>
           </nav>
