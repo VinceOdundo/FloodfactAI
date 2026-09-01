@@ -1,8 +1,16 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ClassificationBadge } from "@/components/classification-badge";
 import { RevealContactButton } from "@/components/admin/reveal-contact-button";
 import { getReportDetail } from "@/lib/data/queries/admin";
+
+const QUALITY_ICON: Record<string, typeof CheckCircle2> = {
+  ok: CheckCircle2,
+  degraded: AlertTriangle,
+  unavailable: HelpCircle,
+};
 
 export default async function ReportDetailPage(props: PageProps<"/admin/reports/[id]">) {
   const { id } = await props.params;
@@ -11,6 +19,10 @@ export default async function ReportDetailPage(props: PageProps<"/admin/reports/
 
   return (
     <div className="max-w-3xl space-y-4">
+      <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs text-foreground/50 hover:text-foreground">
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Back to overview
+      </Link>
       <div>
         <p className="text-xs uppercase tracking-wide text-foreground/50">Report {report.id.slice(0, 8)}</p>
         <h1 className="mt-1 text-xl font-semibold">{report.pilotAreaName ?? "Unresolved location"}</h1>
@@ -52,14 +64,22 @@ export default async function ReportDetailPage(props: PageProps<"/admin/reports/
             </tr>
           </thead>
           <tbody>
-            {report.evidence.map((e, i) => (
-              <tr key={i} className="border-t border-border">
-                <td className="py-2">{e.source.replace(/_/g, " ")}</td>
-                <td className="py-2 capitalize">{e.quality}</td>
-                <td className="py-2">{e.numericValue ?? "—"}</td>
-                <td className="py-2 text-foreground/50">{new Date(e.fetchedAt).toLocaleTimeString()}</td>
-              </tr>
-            ))}
+            {report.evidence.map((e, i) => {
+              const QualityIcon = QUALITY_ICON[e.quality] ?? HelpCircle;
+              return (
+                <tr key={i} className="border-t border-border">
+                  <td className="py-2">{e.source.replace(/_/g, " ")}</td>
+                  <td className="py-2 capitalize">
+                    <span className="flex items-center gap-1.5">
+                      <QualityIcon className="h-3.5 w-3.5 text-foreground/50" />
+                      {e.quality}
+                    </span>
+                  </td>
+                  <td className="py-2">{e.numericValue ?? "—"}</td>
+                  <td className="py-2 text-foreground/50">{new Date(e.fetchedAt).toLocaleTimeString()}</td>
+                </tr>
+              );
+            })}
             {report.evidence.length === 0 && (
               <tr>
                 <td colSpan={4} className="py-3 text-foreground/50">

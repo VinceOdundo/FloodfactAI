@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { TargetBarChart, ComparisonBarChart } from "@/components/admin/charts";
 import { getPilotMetrics } from "@/lib/data/queries/admin";
 
 function fmtPct(v: number | null): string {
@@ -15,6 +16,32 @@ export default async function MetricsPage() {
         Computed live from recorded reports, alerts and ambassador logs — never hand-typed demo numbers
         (see the <code className="text-xs">pilot_metrics</code> view in supabase/migrations).
       </p>
+
+      {metrics.length > 0 && (
+        <div className="mt-6 grid gap-6 rounded-lg border border-border bg-surface p-5 sm:grid-cols-2">
+          <TargetBarChart
+            title="Alerts delivered within 30 minutes"
+            unit="%"
+            target={80}
+            targetLabel="SRS target"
+            data={metrics.map((m) => ({ label: m.pilotAreaName, value: m.alertsWithin30MinPct ?? 0 }))}
+          />
+          <TargetBarChart
+            title="Ambassadors trained"
+            unit="%"
+            target={100}
+            targetLabel="SRS target"
+            data={metrics.map((m) => ({ label: m.pilotAreaName, value: m.ambassadorsTrainedPct ?? 0 }))}
+          />
+          <div className="sm:col-span-2">
+            <ComparisonBarChart
+              title="Households reached, by ward"
+              unit=""
+              data={metrics.map((m) => ({ label: m.pilotAreaName, value: m.householdsReachedTotal }))}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 space-y-4">
         {metrics.map((m) => (

@@ -26,7 +26,13 @@ export default async function AdminOverviewPage() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <LiveMap points={mapPoints} />
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground/60">Pilot map</h2>
+            <Link href="/admin/map" className="text-xs text-brand-500 hover:underline">
+              Open full GIS map →
+            </Link>
+          </div>
+          <LiveMap points={mapPoints} compact />
         </div>
         <Card className="max-h-[420px] overflow-y-auto">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground/60">Live feed</h2>

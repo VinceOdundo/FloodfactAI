@@ -34,7 +34,8 @@ npm run dev
 ```
 
 Visit `http://localhost:3000`. In demo mode, `/login` lets you preview both the admin
-mission-control dashboard and the ambassador PWA with no real credentials.
+mission-control dashboard (live map with real pilot-area boundaries, GIS explorer, analytics) and
+the ambassador PWA with no real credentials. `/blog` has the engineering write-up.
 
 To go live with a real Supabase project (and, optionally, real WhatsApp/SMS/AI credentials), see
 [`docs/SETUP.md`](docs/SETUP.md) — nothing in the code needs to change, only environment variables.

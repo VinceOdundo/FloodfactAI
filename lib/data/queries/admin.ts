@@ -6,6 +6,8 @@ import {
   FIXTURE_AMBASSADORS,
   FIXTURE_DATA_SOURCE_HEALTH,
   FIXTURE_ESCALATIONS,
+  FIXTURE_HISTORICAL_EVENTS,
+  FIXTURE_PILOT_AREAS,
   FIXTURE_PILOT_METRICS,
   FIXTURE_REPORTS,
 } from "@/lib/data/fixtures";
@@ -266,29 +268,48 @@ export interface PilotAreaMapPoint {
   name: string;
   lat: number;
   lon: number;
+  boundary: [number, number][] | null;
+  populationEstimate: number | null;
+  isActivePilot: boolean;
   latestClassification: ClassificationLabel | null;
   openEscalations: number;
 }
 
-const FIXTURE_MAP_POINTS: PilotAreaMapPoint[] = [
-  { id: "10000000-0000-0000-0000-000000000001", name: "Mukuru kwa Reuben", lat: -1.3086, lon: 36.8676, latestClassification: "verified_warning", openEscalations: 1 },
-  { id: "10000000-0000-0000-0000-000000000002", name: "Mukuru kwa Njenga", lat: -1.3139, lon: 36.879, latestClassification: "false_information", openEscalations: 0 },
-  { id: "10000000-0000-0000-0000-000000000003", name: "Viwandani", lat: -1.302, lon: 36.858, latestClassification: "elevated_risk", openEscalations: 0 },
-];
-
-export async function getPilotAreaMapPoints(): Promise<PilotAreaMapPoint[]> {
-  if (isDemoMode()) return FIXTURE_MAP_POINTS;
+/**
+ * By default, only the 3 active Phase-1 wards — matching "N pilot areas"
+ * stat tiles elsewhere on the overview page. Pass includeReference for the
+ * full GIS map, where Kibera/Mathare's historical context is the point.
+ */
+export async function getPilotAreaMapPoints(includeReference = false): Promise<PilotAreaMapPoint[]> {
+  if (isDemoMode()) {
+    const overlay: Record<string, { latestClassification: ClassificationLabel | null; openEscalations: number }> = {
+      "10000000-0000-0000-0000-000000000001": { latestClassification: "verified_warning", openEscalations: 1 },
+      "10000000-0000-0000-0000-000000000002": { latestClassification: "false_information", openEscalations: 0 },
+      "10000000-0000-0000-0000-000000000003": { latestClassification: "elevated_risk", openEscalations: 0 },
+    };
+    return FIXTURE_PILOT_AREAS.filter((a) => includeReference || a.isActivePilot).map((a) => ({
+      id: a.id,
+      name: a.name,
+      lon: a.centroid[0],
+      lat: a.centroid[1],
+      boundary: [...a.boundary],
+      populationEstimate: a.populationEstimate,
+      isActivePilot: a.isActivePilot,
+      latestClassification: overlay[a.id]?.latestClassification ?? null,
+      openEscalations: overlay[a.id]?.openEscalations ?? 0,
+    }));
+  }
 
   const supabase = await createClient();
-  const { data: areas } = await supabase
-    .from("pilot_areas")
-    .select("id, name, centroid")
-    .eq("is_active_pilot", true);
+  let query = supabase.from("pilot_areas").select("id, name, centroid, boundary, population_estimate, is_active_pilot");
+  if (!includeReference) query = query.eq("is_active_pilot", true);
+  const { data: areas } = await query;
 
   const points: PilotAreaMapPoint[] = [];
   for (const area of areas ?? []) {
     const coords = (area.centroid as unknown as { coordinates: [number, number] } | null)?.coordinates;
     if (!coords) continue;
+    const boundaryCoords = (area.boundary as unknown as { coordinates: [number, number][][] } | null)?.coordinates?.[0] ?? null;
 
     const { data: latest } = await supabase
       .from("reports")
@@ -310,11 +331,74 @@ export async function getPilotAreaMapPoints(): Promise<PilotAreaMapPoint[]> {
       name: area.name,
       lon: coords[0],
       lat: coords[1],
+      boundary: boundaryCoords,
+      populationEstimate: area.population_estimate,
+      isActivePilot: area.is_active_pilot,
       latestClassification: classifications[0]?.classification ?? null,
       openEscalations: count ?? 0,
     });
   }
   return points;
+}
+
+export interface HistoricalEventPoint {
+  id: string;
+  locationName: string;
+  eventDate: string;
+  description: string;
+  source: string;
+  severity: "minor" | "moderate" | "severe" | "catastrophic" | null;
+  deaths: number | null;
+  householdsAffected: number | null;
+  lat: number;
+  lon: number;
+}
+
+export async function getHistoricalFloodEvents(): Promise<HistoricalEventPoint[]> {
+  if (isDemoMode()) {
+    const centroidByArea = new Map(FIXTURE_PILOT_AREAS.map((a) => [a.id, a.centroid]));
+    return FIXTURE_HISTORICAL_EVENTS.map((e) => {
+      const centroid = centroidByArea.get(e.pilotAreaId);
+      return {
+        id: e.id,
+        locationName: e.locationName,
+        eventDate: e.eventDate,
+        description: e.description,
+        source: e.source,
+        severity: e.severity,
+        deaths: e.deaths,
+        householdsAffected: e.householdsAffected,
+        lon: centroid?.[0] ?? 36.8676,
+        lat: centroid?.[1] ?? -1.3086,
+      };
+    });
+  }
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("historical_flood_events")
+    .select("id, location_name, event_date, description, source, severity, deaths, households_affected, pilot_areas(centroid)")
+    .order("event_date", { ascending: false });
+
+  return (data ?? []).flatMap((e) => {
+    const coords = (e.pilot_areas as unknown as { centroid: { coordinates: [number, number] } | null } | null)?.centroid
+      ?.coordinates;
+    if (!coords) return [];
+    return [
+      {
+        id: e.id,
+        locationName: e.location_name,
+        eventDate: e.event_date,
+        description: e.description,
+        source: e.source,
+        severity: e.severity,
+        deaths: e.deaths,
+        householdsAffected: e.households_affected,
+        lon: coords[0],
+        lat: coords[1],
+      },
+    ];
+  });
 }
 
 export interface AmbassadorRow {

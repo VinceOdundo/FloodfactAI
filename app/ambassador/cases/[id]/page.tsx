@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ClassificationBadge } from "@/components/classification-badge";
 import { ConfirmFloodingForm } from "@/components/ambassador/confirm-flooding-form";
@@ -11,6 +13,10 @@ export default async function CaseDetailPage(props: PageProps<"/ambassador/cases
 
   return (
     <div className="space-y-4">
+      <Link href="/ambassador" className="inline-flex items-center gap-1.5 text-xs text-foreground/50 hover:text-foreground">
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Back to queue
+      </Link>
       <div>
         <p className="text-xs text-foreground/50">{new Date(report.createdAt).toLocaleString()}</p>
         <p className="mt-1 text-lg leading-snug font-medium text-foreground">{report.rawText}</p>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TriangleAlert, CheckCircle2, Inbox } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ResolveEscalationForm } from "@/components/admin/resolve-escalation-form";
 import { listEscalations } from "@/lib/data/queries/admin";
@@ -22,7 +23,10 @@ export default async function EscalationsPage() {
         {open.map((e) => (
           <Card key={e.id}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase text-elevated">{e.status.replace("_", " ")}</span>
+              <span className="flex items-center gap-1.5 text-xs font-semibold uppercase text-elevated">
+                <TriangleAlert className="h-3.5 w-3.5" />
+                {e.status.replace("_", " ")}
+              </span>
               <span className="text-xs text-foreground/40">{new Date(e.createdAt).toLocaleString()}</span>
             </div>
             <p className="mt-2 text-sm">{e.reason}</p>
@@ -32,7 +36,12 @@ export default async function EscalationsPage() {
             <ResolveEscalationForm escalationId={e.id} />
           </Card>
         ))}
-        {open.length === 0 && <p className="text-sm text-foreground/50">No open escalations.</p>}
+        {open.length === 0 && (
+          <div className="flex items-center gap-2 rounded-lg border border-dashed border-border p-6 text-sm text-foreground/50">
+            <Inbox className="h-4 w-4" />
+            No open escalations.
+          </div>
+        )}
       </div>
 
       {resolved.length > 0 && (
@@ -41,7 +50,10 @@ export default async function EscalationsPage() {
           <div className="mt-2 space-y-2">
             {resolved.map((e) => (
               <Card key={e.id} className="opacity-60">
-                <p className="text-sm">{e.reason}</p>
+                <p className="flex items-start gap-2 text-sm">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-safe" />
+                  {e.reason}
+                </p>
               </Card>
             ))}
           </div>

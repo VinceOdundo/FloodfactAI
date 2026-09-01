@@ -24,6 +24,12 @@ test.describe("public site", () => {
     await expect(page.getByRole("heading", { name: /verified alerts/i })).toBeVisible();
     await page.screenshot({ path: `${SHOT_DIR}/04-alerts-feed.png`, fullPage: true });
   });
+
+  test("blog index and a post render", async ({ page }) => {
+    await page.goto("/blog");
+    await expect(page.getByRole("heading", { name: /how the system works/i })).toBeVisible();
+    await page.screenshot({ path: `${SHOT_DIR}/13-blog-index.png`, fullPage: true });
+  });
 });
 
 test.describe("admin mission control (demo mode)", () => {
@@ -36,6 +42,9 @@ test.describe("admin mission control (demo mode)", () => {
     // list (components/admin/live-map.tsx's own timeout is 6s).
     await page.waitForTimeout(6500);
     await page.screenshot({ path: `${SHOT_DIR}/06-admin-overview.png`, fullPage: true });
+
+    await page.goto("/admin/map");
+    await page.screenshot({ path: `${SHOT_DIR}/14-admin-map.png`, fullPage: true });
 
     await page.goto("/admin/escalations");
     await page.screenshot({ path: `${SHOT_DIR}/07-admin-escalations.png`, fullPage: true });

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ClassificationBadge } from "@/components/classification-badge";
 import { getPublicAlertFeed } from "@/lib/data/queries/public";
@@ -35,7 +36,10 @@ export default async function AlertsPage() {
 
       <div className="mt-8 space-y-3">
         {alerts.length === 0 && (
-          <p className="text-sm text-foreground/60">No active alerts right now — that&apos;s good news.</p>
+          <div className="flex items-center gap-2 rounded-lg border border-dashed border-border p-6 text-sm text-foreground/60">
+            <ShieldCheck className="h-5 w-5 text-safe" />
+            No active alerts right now — that&apos;s good news.
+          </div>
         )}
         {alerts.map((alert) => (
           <Card key={alert.id}>

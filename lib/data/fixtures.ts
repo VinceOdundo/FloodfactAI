@@ -6,10 +6,106 @@
  * when a real project is configured.
  */
 
+// Coordinates mirror supabase/seed.sql exactly (same ST_GeogFromText values)
+// so DEMO_MODE tells the same geographic story as a seeded production DB.
 export const FIXTURE_PILOT_AREAS = [
-  { id: "10000000-0000-0000-0000-000000000001", slug: "mukuru-kwa-reuben", name: "Mukuru kwa Reuben", isActivePilot: true },
-  { id: "10000000-0000-0000-0000-000000000002", slug: "mukuru-kwa-njenga", name: "Mukuru kwa Njenga", isActivePilot: true },
-  { id: "10000000-0000-0000-0000-000000000003", slug: "viwandani", name: "Viwandani", isActivePilot: true },
+  {
+    id: "10000000-0000-0000-0000-000000000001",
+    slug: "mukuru-kwa-reuben",
+    name: "Mukuru kwa Reuben",
+    isActivePilot: true,
+    populationEstimate: 65000,
+    centroid: [36.8676, -1.3086] as [number, number],
+    boundary: [
+      [36.8636, -1.3056], [36.8716, -1.3056], [36.8716, -1.3116], [36.8636, -1.3116], [36.8636, -1.3056],
+    ] as [number, number][],
+  },
+  {
+    id: "10000000-0000-0000-0000-000000000002",
+    slug: "mukuru-kwa-njenga",
+    name: "Mukuru kwa Njenga",
+    isActivePilot: true,
+    populationEstimate: 90000,
+    centroid: [36.879, -1.3139] as [number, number],
+    boundary: [
+      [36.875, -1.3109], [36.883, -1.3109], [36.883, -1.3169], [36.875, -1.3169], [36.875, -1.3109],
+    ] as [number, number][],
+  },
+  {
+    id: "10000000-0000-0000-0000-000000000003",
+    slug: "viwandani",
+    name: "Viwandani",
+    isActivePilot: true,
+    populationEstimate: 40000,
+    centroid: [36.858, -1.302] as [number, number],
+    boundary: [
+      [36.854, -1.299], [36.862, -1.299], [36.862, -1.305], [36.854, -1.305], [36.854, -1.299],
+    ] as [number, number][],
+  },
+  {
+    id: "10000000-0000-0000-0000-000000000004",
+    slug: "kibera",
+    name: "Kibera",
+    isActivePilot: false,
+    populationEstimate: 185000,
+    centroid: [36.782, -1.3133] as [number, number],
+    boundary: [
+      [36.778, -1.3103], [36.786, -1.3103], [36.786, -1.3163], [36.778, -1.3163], [36.778, -1.3103],
+    ] as [number, number][],
+  },
+  {
+    id: "10000000-0000-0000-0000-000000000005",
+    slug: "mathare",
+    name: "Mathare",
+    isActivePilot: false,
+    populationEstimate: 87000,
+    centroid: [36.857, -1.2586] as [number, number],
+    boundary: [
+      [36.853, -1.2556], [36.861, -1.2556], [36.861, -1.2616], [36.853, -1.2616], [36.853, -1.2556],
+    ] as [number, number][],
+  },
+] as const;
+
+// Mirrors supabase/seed.sql's historical_flood_events exactly — including
+// the honest "ILLUSTRATIVE EXAMPLE" caveat on the one entry that isn't an
+// independently sourced incident.
+export const FIXTURE_HISTORICAL_EVENTS = [
+  {
+    id: "70000000-0000-0000-0000-000000000001",
+    pilotAreaId: "10000000-0000-0000-0000-000000000005",
+    locationName: "Mathare",
+    eventDate: "2024-04-15",
+    description:
+      "Flash flood struck Mathare at approximately 2 AM with no official alert issued; residents woke to waist-high water. A viral WhatsApp voice note falsely claiming a nearby dam had burst caused families to flee into unaffected, more dangerous streets; two people were injured in the panic.",
+    source: "Kenya Red Cross field report, Apr 2024",
+    severity: "severe" as const,
+    deaths: 0,
+    householdsAffected: null,
+  },
+  {
+    id: "70000000-0000-0000-0000-000000000002",
+    pilotAreaId: "10000000-0000-0000-0000-000000000004",
+    locationName: "Kibera",
+    eventDate: "2023-05-01",
+    description:
+      "Long rains caused severe flooding across Kibera. KMD had issued a regional advisory but it never reached households; the average delay before any alert reached residents was 72 hours. So many false WhatsApp warnings had circulated earlier that many residents dismissed the eventual official SMS alerts as rumours, and thousands delayed evacuation.",
+    source: "Kenya Red Cross 2023; iHub Kenya Research",
+    severity: "severe" as const,
+    deaths: null,
+    householdsAffected: null,
+  },
+  {
+    id: "70000000-0000-0000-0000-000000000003",
+    pilotAreaId: "10000000-0000-0000-0000-000000000001",
+    locationName: "Mukuru kwa Reuben",
+    eventDate: "2022-11-20",
+    description:
+      "ILLUSTRATIVE EXAMPLE (not independently sourced): moderate flooding along the Ngong River affecting low-lying structures. Included to demonstrate the historical-base-rate evidence source until real Mukuru-specific incident records are collected during the Phase-1 pilot.",
+    source: "Illustrative — replace with verified pilot-collected records",
+    severity: "moderate" as const,
+    deaths: 0,
+    householdsAffected: 40,
+  },
 ] as const;
 
 export const FIXTURE_PILOT_METRICS = [
