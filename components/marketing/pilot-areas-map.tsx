@@ -11,7 +11,7 @@ import type { PublicPilotAreaBoundary } from "@/lib/data/queries/public";
 // ward boundaries (supabase/migrations/20260902000100_real_pilot_area_boundaries.sql),
 // no classification/escalation status (that stays admin-only).
 const DEMO_STYLE_URL = "https://demotiles.maplibre.org/style.json";
-const STYLE_LOAD_TIMEOUT_MS = 6000;
+const STYLE_LOAD_TIMEOUT_MS = 15000;
 const SOURCE_ID = "public-pilot-area-boundaries";
 const BRAND_FILL = "#0f6f73";
 
@@ -48,7 +48,10 @@ export function PilotAreasMap({ areas }: { areas: PublicPilotAreaBoundary[] }) {
     mapRef.current = map;
 
     const failTimer = setTimeout(() => setBasemapFailed(true), STYLE_LOAD_TIMEOUT_MS);
-    map.once("load", () => clearTimeout(failTimer));
+    map.once("load", () => {
+      clearTimeout(failTimer);
+      setBasemapFailed(false);
+    });
     map.on("error", (e) => {
       console.error("Map failed to load:", e.error);
       clearTimeout(failTimer);

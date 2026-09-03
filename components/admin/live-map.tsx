@@ -12,7 +12,7 @@ import type { PilotAreaMapPoint, HistoricalEventPoint } from "@/lib/data/queries
 // OSM's raw tile servers are not meant for production traffic. See
 // docs/DATA_SOURCES.md.
 const DEMO_STYLE_URL = "https://demotiles.maplibre.org/style.json";
-const STYLE_LOAD_TIMEOUT_MS = 6000;
+const STYLE_LOAD_TIMEOUT_MS = 15000;
 const BOUNDARY_SOURCE_ID = "pilot-area-boundaries";
 const REFERENCE_FILL = "#64748b";
 
@@ -73,7 +73,13 @@ export function LiveMap({
     // looking at a blank box with no explanation. Fall back to a plain
     // status list, which needs nothing but the same data already fetched.
     const failTimer = setTimeout(() => setBasemapFailed(true), STYLE_LOAD_TIMEOUT_MS);
-    map.once("load", () => clearTimeout(failTimer));
+    map.once("load", () => {
+      clearTimeout(failTimer);
+      // The style can finish loading after the timeout already fired on a slow
+      // connection — recover into the real map instead of staying stuck on the
+      // fallback for the rest of the session.
+      setBasemapFailed(false);
+    });
     map.on("error", (e) => {
       console.error("Map failed to load:", e.error);
       clearTimeout(failTimer);
