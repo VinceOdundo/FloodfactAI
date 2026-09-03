@@ -5,12 +5,13 @@ import { GeoJSONSource, MapLibreMap, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { PublicPilotAreaBoundary } from "@/lib/data/queries/public";
 
-// Same MapLibre demo style + graceful fallback pattern as
-// components/admin/live-map.tsx — see that file for the production-tile-
-// provider caveat. This is the public, non-operational counterpart: real
-// ward boundaries (supabase/migrations/20260902000100_real_pilot_area_boundaries.sql),
-// no classification/escalation status (that stays admin-only).
-const DEMO_STYLE_URL = "https://demotiles.maplibre.org/style.json";
+// Same OpenFreeMap basemap + graceful fallback pattern as
+// components/admin/live-map.tsx — see that file for why (a real street-level
+// style, not MapLibre's bare demo outline). This is the public,
+// non-operational counterpart: real ward boundaries
+// (supabase/migrations/20260902000100_real_pilot_area_boundaries.sql), no
+// classification/escalation status (that stays admin-only).
+const DEMO_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 const STYLE_LOAD_TIMEOUT_MS = 15000;
 const SOURCE_ID = "public-pilot-area-boundaries";
 const BRAND_FILL = "#0f6f73";

@@ -6,12 +6,12 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { AlertTriangle, Layers } from "lucide-react";
 import type { PilotAreaMapPoint, HistoricalEventPoint } from "@/lib/data/queries/admin";
 
-// MapLibre's own hosted demo style: free, keyless, explicitly intended for
-// exactly this (development/demo use). A production deployment should point
-// at a proper tile provider (MapTiler, Stadia Maps, or self-hosted) instead —
-// OSM's raw tile servers are not meant for production traffic. See
-// docs/DATA_SOURCES.md.
-const DEMO_STYLE_URL = "https://demotiles.maplibre.org/style.json";
+// OpenFreeMap: free, keyless, no rate limit, explicitly built for production
+// use (unlike MapLibre's own demo style, which is a bare global outline with
+// no streets/labels — unusable for an operational map). "positron" is a
+// clean, light, low-chroma basemap so classification-colored markers and
+// boundary fills stay the visual focus. See docs/DATA_SOURCES.md.
+const DEMO_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 const STYLE_LOAD_TIMEOUT_MS = 15000;
 const BOUNDARY_SOURCE_ID = "pilot-area-boundaries";
 const REFERENCE_FILL = "#64748b";
