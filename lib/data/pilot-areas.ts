@@ -1,6 +1,7 @@
 import "server-only";
 import { createServiceClient } from "@/lib/supabase/service";
 import { matchPilotAreaSlug } from "@/lib/core/geocode";
+import { parseEwkbPoint } from "@/lib/core/geo-wkb";
 import type { GeoPoint } from "@/lib/providers/shared";
 
 export interface PilotArea {
@@ -10,17 +11,12 @@ export interface PilotArea {
   centroid: GeoPoint | null;
 }
 
-function parseCentroid(wkt: unknown): GeoPoint | null {
-  // Supabase returns geography columns as GeoJSON when selected with the
-  // `geojson` cast, or as WKB hex by default. We select via an RPC-free
-  // approach: query centroid as text using PostGIS's ST_AsText through a
-  // generated column would need a migration change, so instead we ask
-  // PostgREST for the geography as GeoJSON directly (see select string).
-  if (wkt && typeof wkt === "object" && "coordinates" in (wkt as Record<string, unknown>)) {
-    const coords = (wkt as { coordinates: [number, number] }).coordinates;
-    return { lon: coords[0], lat: coords[1] };
-  }
-  return null;
+function parseCentroid(wkb: unknown): GeoPoint | null {
+  // PostgREST returns a plain `geography` column as EWKB hex text, not
+  // GeoJSON — there's no select-string cast that changes that for a base
+  // table column. See lib/core/geo-wkb.ts.
+  if (typeof wkb !== "string") return null;
+  return parseEwkbPoint(wkb);
 }
 
 export async function getPilotAreaBySlug(slug: string): Promise<PilotArea | null> {

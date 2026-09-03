@@ -49,6 +49,13 @@ test.describe("admin mission control (demo mode)", () => {
     await page.goto("/admin/escalations");
     await page.screenshot({ path: `${SHOT_DIR}/07-admin-escalations.png`, fullPage: true });
 
+    // Not just viewing the queue — actually resolve one.
+    await page.getByPlaceholder(/what did you find/i).first().fill(
+      "Checked with the ambassador on the ground — false alarm, cleared."
+    );
+    await page.getByRole("button", { name: /mark resolved/i }).first().click();
+    await expect(page.getByText(/^resolved\.$/i).first()).toBeVisible({ timeout: 10000 });
+
     await page.goto("/admin/metrics");
     await page.screenshot({ path: `${SHOT_DIR}/08-admin-metrics.png`, fullPage: true });
 
@@ -70,5 +77,9 @@ test.describe("ambassador PWA (demo mode)", () => {
 
     await page.goto("/ambassador/cases/30000000-0000-0000-0000-000000000001");
     await page.screenshot({ path: `${SHOT_DIR}/12-ambassador-case.png`, fullPage: true });
+
+    // Not just viewing the case — actually submit a ground-truth confirmation.
+    await page.getByRole("button", { name: /yes, flooding confirmed/i }).click();
+    await expect(page.getByText(/thanks — logged on the ground/i)).toBeVisible({ timeout: 10000 });
   });
 });

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { BLOG_POSTS, getBlogPost, type Block } from "@/lib/content/blog";
+import { BlogCoverArt } from "@/components/brand/blog-motifs";
 
 export function generateStaticParams() {
   return BLOG_POSTS.map((post) => ({ slug: post.slug }));
@@ -34,6 +35,8 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
         <span className="text-foreground/50">{post.readMinutes} min read</span>
       </div>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{post.title}</h1>
+
+      <BlogCoverArt slug={post.slug} className="mt-8 h-28 rounded-lg border border-border bg-brand-50 p-4" />
 
       <div className="mt-8 space-y-4">
         {post.body.map((block, i) => (

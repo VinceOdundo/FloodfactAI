@@ -2,6 +2,7 @@ import "server-only";
 import { isDemoMode } from "@/lib/config/env";
 import { createClient } from "@/lib/supabase/server";
 import { buildAlertMessage } from "@/lib/core/alert-templates";
+import { parseEwkbPoint, parseEwkbPolygon } from "@/lib/core/geo-wkb";
 import {
   FIXTURE_AMBASSADORS,
   FIXTURE_DATA_SOURCE_HEALTH,
@@ -22,6 +23,7 @@ export interface ReportListItem {
   id: string;
   sourceChannel: string;
   rawText: string;
+  pilotAreaId: string | null;
   pilotAreaName: string | null;
   hazardType: string;
   status: string;
@@ -42,7 +44,7 @@ export async function listReports(limit = 50): Promise<ReportListItem[]> {
   const { data } = await supabase
     .from("reports")
     .select(
-      "id, source_channel, raw_text, hazard_type, status, created_at, pilot_areas(name), classifications(classification, confidence, insufficient_evidence, rationale_en, created_at)"
+      "id, source_channel, raw_text, pilot_area_id, hazard_type, status, created_at, pilot_areas(name), classifications(classification, confidence, insufficient_evidence, rationale_en, created_at)"
     )
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -60,6 +62,7 @@ export async function listReports(limit = 50): Promise<ReportListItem[]> {
       id: r.id,
       sourceChannel: r.source_channel,
       rawText: r.raw_text,
+      pilotAreaId: r.pilot_area_id,
       pilotAreaName: (r.pilot_areas as unknown as { name: string } | null)?.name ?? null,
       hazardType: r.hazard_type,
       status: r.status,
@@ -74,6 +77,127 @@ export async function listReports(limit = 50): Promise<ReportListItem[]> {
         : null,
     };
   });
+}
+
+export interface ReportSearchParams {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+  classification?: ClassificationLabel;
+  pilotAreaId?: string;
+  from?: string;
+  to?: string;
+  q?: string;
+}
+
+export interface ReportSearchResult {
+  items: ReportListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/**
+ * Paginated, filterable report search for /admin/reports — the dashboard's
+ * `listReports(15)` feed has no filters, search, or paging beyond a flat
+ * cap, which doesn't hold up once a pilot has more than a screenful of
+ * reports.
+ */
+export async function searchReports(params: ReportSearchParams = {}): Promise<ReportSearchResult> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = params.pageSize ?? 20;
+
+  if (isDemoMode()) {
+    let items = FIXTURE_REPORTS.map((r) => ({ ...r })) as ReportListItem[];
+    if (params.status) items = items.filter((r) => r.status === params.status);
+    if (params.classification) {
+      items = items.filter((r) => r.classification?.classification === params.classification);
+    }
+    if (params.pilotAreaId) items = items.filter((r) => r.pilotAreaId === params.pilotAreaId);
+    if (params.from) items = items.filter((r) => r.createdAt >= params.from!);
+    if (params.to) items = items.filter((r) => r.createdAt <= params.to!);
+    if (params.q) {
+      const needle = params.q.toLowerCase();
+      items = items.filter((r) => r.rawText.toLowerCase().includes(needle));
+    }
+    const total = items.length;
+    const start = (page - 1) * pageSize;
+    return { items: items.slice(start, start + pageSize), total, page, pageSize };
+  }
+
+  const supabase = await createClient();
+  const start = (page - 1) * pageSize;
+
+  // Two separate literal `.select()` calls, not one built from a variable:
+  // PostgREST's embedded-resource filter (`classifications.classification`)
+  // only *restricts* reports (rather than just filtering which nested rows
+  // come back) when the relation is `!inner`-joined — but joining `!inner`
+  // unconditionally would silently drop every not-yet-classified report
+  // (pending/processing) from every search, filtered or not. A dynamic
+  // select string also loses Supabase's generated row typing entirely
+  // (falls back to an untyped `GenericStringError`), so this keeps each
+  // branch a real literal instead of trying to share one query variable.
+  const { data, count } = params.classification
+    ? await (() => {
+        let q = supabase
+          .from("reports")
+          .select(
+            "id, source_channel, raw_text, pilot_area_id, hazard_type, status, created_at, pilot_areas(name), classifications!inner(classification, confidence, insufficient_evidence, rationale_en, created_at)",
+            { count: "exact" }
+          )
+          .eq("classifications.classification", params.classification);
+        if (params.status) q = q.eq("status", params.status);
+        if (params.pilotAreaId) q = q.eq("pilot_area_id", params.pilotAreaId);
+        if (params.from) q = q.gte("created_at", params.from);
+        if (params.to) q = q.lte("created_at", params.to);
+        if (params.q) q = q.ilike("raw_text", `%${params.q}%`);
+        return q.order("created_at", { ascending: false }).range(start, start + pageSize - 1);
+      })()
+    : await (() => {
+        let q = supabase
+          .from("reports")
+          .select(
+            "id, source_channel, raw_text, pilot_area_id, hazard_type, status, created_at, pilot_areas(name), classifications(classification, confidence, insufficient_evidence, rationale_en, created_at)",
+            { count: "exact" }
+          );
+        if (params.status) q = q.eq("status", params.status);
+        if (params.pilotAreaId) q = q.eq("pilot_area_id", params.pilotAreaId);
+        if (params.from) q = q.gte("created_at", params.from);
+        if (params.to) q = q.lte("created_at", params.to);
+        if (params.q) q = q.ilike("raw_text", `%${params.q}%`);
+        return q.order("created_at", { ascending: false }).range(start, start + pageSize - 1);
+      })();
+
+  const items = (data ?? []).map((r) => {
+    const classifications = (r.classifications as unknown as Array<{
+      classification: ClassificationLabel;
+      confidence: number;
+      insufficient_evidence: boolean;
+      rationale_en: string;
+      created_at: string;
+    }>) ?? [];
+    const latest = [...classifications].sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null;
+    return {
+      id: r.id,
+      sourceChannel: r.source_channel,
+      rawText: r.raw_text,
+      pilotAreaId: r.pilot_area_id,
+      pilotAreaName: (r.pilot_areas as unknown as { name: string } | null)?.name ?? null,
+      hazardType: r.hazard_type,
+      status: r.status,
+      createdAt: r.created_at,
+      classification: latest
+        ? {
+            classification: latest.classification,
+            confidence: latest.confidence,
+            insufficientEvidence: latest.insufficient_evidence,
+            rationaleEn: latest.rationale_en,
+          }
+        : null,
+    };
+  });
+
+  return { items, total: count ?? items.length, page, pageSize };
 }
 
 export interface EscalationItem {
@@ -200,7 +324,7 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
   const { data: r } = await supabase
     .from("reports")
     .select(
-      "id, source_channel, raw_text, claimed_location_text, hazard_type, status, created_at, pilot_areas(name), classifications(id, classification, confidence, insufficient_evidence, rationale_en, created_at)"
+      "id, source_channel, raw_text, claimed_location_text, pilot_area_id, hazard_type, status, created_at, pilot_areas(name), classifications(id, classification, confidence, insufficient_evidence, rationale_en, created_at)"
     )
     .eq("id", id)
     .maybeSingle();
@@ -241,6 +365,7 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
     sourceChannel: r.source_channel,
     rawText: r.raw_text,
     claimedLocationText: r.claimed_location_text,
+    pilotAreaId: r.pilot_area_id,
     pilotAreaName: (r.pilot_areas as unknown as { name: string } | null)?.name ?? null,
     hazardType: r.hazard_type,
     status: r.status,
@@ -307,9 +432,9 @@ export async function getPilotAreaMapPoints(includeReference = false): Promise<P
 
   const points: PilotAreaMapPoint[] = [];
   for (const area of areas ?? []) {
-    const coords = (area.centroid as unknown as { coordinates: [number, number] } | null)?.coordinates;
+    const coords = typeof area.centroid === "string" ? parseEwkbPoint(area.centroid) : null;
     if (!coords) continue;
-    const boundaryCoords = (area.boundary as unknown as { coordinates: [number, number][][] } | null)?.coordinates?.[0] ?? null;
+    const boundaryCoords = typeof area.boundary === "string" ? parseEwkbPolygon(area.boundary) : null;
 
     const { data: latest } = await supabase
       .from("reports")
@@ -329,8 +454,8 @@ export async function getPilotAreaMapPoints(includeReference = false): Promise<P
     points.push({
       id: area.id,
       name: area.name,
-      lon: coords[0],
-      lat: coords[1],
+      lon: coords.lon,
+      lat: coords.lat,
       boundary: boundaryCoords,
       populationEstimate: area.population_estimate,
       isActivePilot: area.is_active_pilot,
@@ -381,8 +506,8 @@ export async function getHistoricalFloodEvents(): Promise<HistoricalEventPoint[]
     .order("event_date", { ascending: false });
 
   return (data ?? []).flatMap((e) => {
-    const coords = (e.pilot_areas as unknown as { centroid: { coordinates: [number, number] } | null } | null)?.centroid
-      ?.coordinates;
+    const centroidHex = (e.pilot_areas as unknown as { centroid: string | null } | null)?.centroid ?? null;
+    const coords = typeof centroidHex === "string" ? parseEwkbPoint(centroidHex) : null;
     if (!coords) return [];
     return [
       {
@@ -394,8 +519,8 @@ export async function getHistoricalFloodEvents(): Promise<HistoricalEventPoint[]
         severity: e.severity,
         deaths: e.deaths,
         householdsAffected: e.households_affected,
-        lon: coords[0],
-        lat: coords[1],
+        lon: coords.lon,
+        lat: coords.lat,
       },
     ];
   });
@@ -425,4 +550,23 @@ export async function listAmbassadors(): Promise<AmbassadorRow[]> {
     trainingStatus: a.training_status,
     active: a.active,
   }));
+}
+
+export interface PilotAreaOption {
+  id: string;
+  name: string;
+}
+
+/** Active pilot areas only — for the ambassador-onboarding form's dropdown. */
+export async function listActivePilotAreasForSelect(): Promise<PilotAreaOption[]> {
+  if (isDemoMode()) {
+    return FIXTURE_PILOT_AREAS.filter((a) => a.isActivePilot).map((a) => ({ id: a.id, name: a.name }));
+  }
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pilot_areas")
+    .select("id, name")
+    .eq("is_active_pilot", true)
+    .order("name");
+  return data ?? [];
 }

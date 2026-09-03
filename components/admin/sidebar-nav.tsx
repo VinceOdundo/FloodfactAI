@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, TriangleAlert, BarChart3, Map as MapIcon, Database, Users } from "lucide-react";
+import { LayoutDashboard, FileText, TriangleAlert, BarChart3, Map as MapIcon, Database, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const ADMIN_NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/reports", label: "Reports", icon: FileText },
   { href: "/admin/escalations", label: "Escalations", icon: TriangleAlert },
   { href: "/admin/metrics", label: "Pilot Metrics", icon: BarChart3 },
   { href: "/admin/map", label: "GIS Map", icon: MapIcon },

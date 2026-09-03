@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { TriangleAlert, CheckCircle2, Inbox } from "lucide-react";
+import { formatDistanceToNowStrict } from "date-fns";
+import { TriangleAlert, CheckCircle2, Inbox, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ResolveEscalationForm } from "@/components/admin/resolve-escalation-form";
 import { listEscalations } from "@/lib/data/queries/admin";
+import { isEscalationBreached } from "@/lib/core/escalation-sla";
+import { cn } from "@/lib/utils";
 
 export default async function EscalationsPage() {
   const escalations = await listEscalations();
@@ -20,14 +23,25 @@ export default async function EscalationsPage() {
       </div>
 
       <div className="space-y-3">
-        {open.map((e) => (
+        {open.map((e) => {
+          const breached = isEscalationBreached(e.createdAt);
+          return (
           <Card key={e.id}>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs font-semibold uppercase text-elevated">
                 <TriangleAlert className="h-3.5 w-3.5" />
                 {e.status.replace("_", " ")}
               </span>
-              <span className="text-xs text-foreground/40">{new Date(e.createdAt).toLocaleString()}</span>
+              <span
+                className={cn(
+                  "flex items-center gap-1 text-xs",
+                  breached ? "font-semibold text-verified" : "text-foreground/40"
+                )}
+                title={new Date(e.createdAt).toLocaleString()}
+              >
+                <Clock className="h-3 w-3" />
+                open {formatDistanceToNowStrict(new Date(e.createdAt))}
+              </span>
             </div>
             <p className="mt-2 text-sm">{e.reason}</p>
             <Link href={`/admin/reports/${e.reportId}`} className="mt-1 inline-block text-xs text-brand-500 hover:underline">
@@ -35,7 +49,8 @@ export default async function EscalationsPage() {
             </Link>
             <ResolveEscalationForm escalationId={e.id} />
           </Card>
-        ))}
+          );
+        })}
         {open.length === 0 && (
           <div className="flex items-center gap-2 rounded-lg border border-dashed border-border p-6 text-sm text-foreground/50">
             <Inbox className="h-4 w-4" />

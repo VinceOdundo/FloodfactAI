@@ -2,11 +2,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RippleMotif } from "@/components/brand/ripple-motif";
-import { getHeadlineStats } from "@/lib/data/queries/public";
+import { PilotAreasMap } from "@/components/marketing/pilot-areas-map";
+import { getHeadlineStats, getActivePilotAreaBoundaries } from "@/lib/data/queries/public";
 import { isDemoMode } from "@/lib/config/env";
 
 export default async function HomePage() {
-  const stats = await getHeadlineStats();
+  const [stats, pilotAreas] = await Promise.all([getHeadlineStats(), getActivePilotAreaBoundaries()]);
 
   return (
     <div>
@@ -88,6 +89,27 @@ export default async function HomePage() {
             <Step n={2} title="AI cross-checks" body="Real rainfall, flood-risk zones, historical records, and ground-truth reports — gathered in parallel." />
             <Step n={3} title="Classified in seconds" body="A deterministic, tested decision engine — never an LLM guess — reaches a verdict with evidence attached." />
             <Step n={4} title="Alert delivered" body="WhatsApp, SMS, community notice points, and youth ambassadors carry the verified result back out." />
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-4 py-20 sm:px-6">
+        <h2 className="text-center text-2xl font-semibold tracking-tight text-foreground">Where we&apos;re piloting</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-foreground/70">
+          Phase 1 covers three real Nairobi wards — Mukuru kwa Reuben, Mukuru kwa Njenga, and Viwandani
+          — mapped from OpenStreetMap&apos;s administrative boundaries, not an approximation.
+        </p>
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          <div className="h-[340px] lg:col-span-2">
+            <PilotAreasMap areas={pilotAreas} />
+          </div>
+          <div className="flex flex-col justify-center gap-4">
+            {pilotAreas.map((area) => (
+              <div key={area.id} className="rounded-lg border border-border bg-surface p-4">
+                <p className="font-medium text-foreground">{area.name}</p>
+                <p className="mt-0.5 text-xs text-foreground/50">Active Phase 1 pilot ward</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

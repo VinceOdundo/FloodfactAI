@@ -1,6 +1,7 @@
 import { GraduationCap, Clock, Circle } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { listAmbassadors } from "@/lib/data/queries/admin";
+import { listAmbassadors, listActivePilotAreasForSelect } from "@/lib/data/queries/admin";
+import { CreateAmbassadorForm } from "@/components/admin/create-ambassador-form";
 import { cn } from "@/lib/utils";
 
 const TRAINING_STYLES: Record<string, string> = {
@@ -16,7 +17,7 @@ const TRAINING_ICON: Record<string, typeof GraduationCap> = {
 };
 
 export default async function AmbassadorsPage() {
-  const ambassadors = await listAmbassadors();
+  const [ambassadors, pilotAreas] = await Promise.all([listAmbassadors(), listActivePilotAreasForSelect()]);
   const trainedCount = ambassadors.filter((a) => a.trainingStatus === "trained").length;
 
   return (
@@ -29,6 +30,11 @@ export default async function AmbassadorsPage() {
         {trainedCount} of {ambassadors.length} trained ·{" "}
         {ambassadors.length ? Math.round((trainedCount / ambassadors.length) * 100) : 0}%
       </p>
+
+      <div className="mt-4">
+        <CreateAmbassadorForm pilotAreas={pilotAreas} />
+      </div>
+
       <div className="mt-4 space-y-2">
         {ambassadors.map((a) => {
           const Icon = TRAINING_ICON[a.trainingStatus] ?? Circle;

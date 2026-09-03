@@ -86,6 +86,18 @@ function loadEnv(): Env {
     }
   }
 
+  // A configured access token means the WhatsApp webhook will accept live
+  // inbound traffic — in that case the signature secret is not optional.
+  // Refuse to boot into that combination rather than silently accepting
+  // unverified webhook payloads (see app/api/webhooks/whatsapp/route.ts).
+  if (env.WHATSAPP_ACCESS_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID && !env.WHATSAPP_APP_SECRET) {
+    throw new Error(
+      "WHATSAPP_ACCESS_TOKEN/WHATSAPP_PHONE_NUMBER_ID are set (live mode) but " +
+        "WHATSAPP_APP_SECRET is missing — webhook signature verification would be " +
+        "silently skipped. Set WHATSAPP_APP_SECRET (App Settings → Basic) before going live."
+    );
+  }
+
   return env;
 }
 

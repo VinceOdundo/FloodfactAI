@@ -7,7 +7,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth/session";
 
 const schema = z.object({
-  reportId: z.string().uuid().optional().or(z.literal("")),
+  // z.guid(), not z.string().uuid(): the latter enforces RFC 4122 v4
+  // version/variant bits, which this project's seed/demo placeholder ids
+  // (e.g. "30000000-0000-0000-0000-000000000001") don't satisfy even though
+  // they're valid Postgres `uuid` values — z.guid() matches what Postgres
+  // itself accepts.
+  reportId: z.guid().optional().or(z.literal("")),
   observationType: z.enum(["water_level", "visual_confirmation", "household_reached", "other"]),
   measurement: z.coerce.number().optional(),
   confirmed: z.enum(["true", "false"]).optional(),

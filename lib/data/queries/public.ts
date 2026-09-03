@@ -1,6 +1,7 @@
 import "server-only";
 import { isDemoMode } from "@/lib/config/env";
 import { createServiceClient } from "@/lib/supabase/service";
+import { parseEwkbPoint, parseEwkbPolygon } from "@/lib/core/geo-wkb";
 import { FIXTURE_PILOT_AREAS, FIXTURE_PILOT_METRICS, FIXTURE_PUBLIC_ALERTS } from "@/lib/data/fixtures";
 
 export interface PublicAlert {
@@ -29,6 +30,46 @@ export async function getPublicAlertFeed(limit = 20): Promise<PublicAlert[]> {
     messageSw: r.message_sw,
     createdAt: r.created_at,
   }));
+}
+
+export interface PublicPilotAreaBoundary {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  boundary: [number, number][] | null;
+}
+
+/**
+ * Ward name + boundary only — no classification/escalation status, unlike
+ * the admin GIS map's `getPilotAreaMapPoints`. `pilot_areas` is public-read
+ * by RLS design (ward names/boundaries aren't sensitive; see
+ * 0004_rls_policies.sql), but operational state is admin/ambassador-only.
+ */
+export async function getActivePilotAreaBoundaries(): Promise<PublicPilotAreaBoundary[]> {
+  if (isDemoMode()) {
+    return FIXTURE_PILOT_AREAS.filter((a) => a.isActivePilot).map((a) => ({
+      id: a.id,
+      name: a.name,
+      lon: a.centroid[0],
+      lat: a.centroid[1],
+      boundary: [...a.boundary],
+    }));
+  }
+  const supabase = createServiceClient();
+  const { data: areas } = await supabase
+    .from("pilot_areas")
+    .select("id, name, centroid, boundary")
+    .eq("is_active_pilot", true);
+
+  const points: PublicPilotAreaBoundary[] = [];
+  for (const area of areas ?? []) {
+    const coords = typeof area.centroid === "string" ? parseEwkbPoint(area.centroid) : null;
+    if (!coords) continue;
+    const boundaryCoords = typeof area.boundary === "string" ? parseEwkbPolygon(area.boundary) : null;
+    points.push({ id: area.id, name: area.name, lon: coords.lon, lat: coords.lat, boundary: boundaryCoords });
+  }
+  return points;
 }
 
 export interface HeadlineStats {

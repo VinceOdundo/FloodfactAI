@@ -4,10 +4,12 @@ import { getRainfallEvidence } from "@/lib/providers/weather-openmeteo";
 import { getFloodRiskEvidence } from "@/lib/providers/flood-risk-arcgis";
 import { getRiverLevelEvidence } from "@/lib/providers/river-level";
 
-// Mukuru kwa Reuben centroid — a real point inside the active pilot area,
-// used purely to exercise each provider so the ops dashboard's source-health
-// panel reflects current status even during quiet periods with no reports.
-const TEST_POINT = { lat: -1.3086, lon: 36.8676 };
+// Mukuru kwa Reuben's real ward centroid (OSM "Kwa Reuben ward", see
+// supabase/migrations/20260902000100_real_pilot_area_boundaries.sql) — a
+// real point inside the active pilot area, used purely to exercise each
+// provider so the ops dashboard's source-health panel reflects current
+// status even during quiet periods with no reports.
+const TEST_POINT = { lat: -1.3152004, lon: 36.8820407 };
 
 /** Invoked on a schedule (see .github/workflows/health-check.yml) — evidence itself is always fetched per-report, not cached here. */
 export async function GET(request: Request) {

@@ -11,7 +11,9 @@ interface ArcGisQueryResponse {
 // Common field-name candidates across public flood-hazard layers. Esri
 // datasets don't share one schema, so this is a best-effort lookup — a
 // specific licensed layer may need its field name added here.
-const RISK_LEVEL_FIELDS = ["RiskLevel", "Risk_Level", "HAZARD", "hazard_class", "flood_risk", "FLOOD_RISK"];
+// "rfr_label" is WRI Aqueduct's riverine-flood-risk label (e.g. "Low -
+// Medium (1 in 1,000 to 2 in 1,000)") — see docs/DATA_SOURCES.md.
+const RISK_LEVEL_FIELDS = ["RiskLevel", "Risk_Level", "HAZARD", "hazard_class", "flood_risk", "FLOOD_RISK", "rfr_label"];
 
 /**
  * Queries the ArcGIS FeatureServer/MapServer layer configured via
@@ -49,14 +51,24 @@ export async function getFloodRiskLive(point: GeoPoint): Promise<FloodRiskZoneEv
   }
 
   const features = data.features ?? [];
-  const inRiskZone = features.length > 0;
-  const riskLevel = inRiskZone ? extractRiskLevel(features[0]?.attributes) : "low";
+  const hasFeature = features.length > 0;
+  const matched = hasFeature ? extractRiskLevel(features[0]?.attributes) : null;
+
+  // Two shapes of layer, told apart by whether a recognized risk-level field
+  // was actually found: a binary hazard-zone polygon (no such field) means
+  // "in zone" is just "a feature intersects here", same as always. A
+  // wall-to-wall risk-category dataset (WRI Aqueduct: a polygon covers every
+  // point on Earth) means presence is meaningless — "in risk zone" has to
+  // come from the assessed level instead, or every point everywhere would
+  // read as elevated risk.
+  const riskLevel = matched ?? (hasFeature ? "moderate" : "low");
+  const inRiskZone = matched ? matched !== "low" : hasFeature;
 
   return { source: "arcgis_flood_risk", quality: "ok", inRiskZone, riskLevel };
 }
 
-function extractRiskLevel(attributes?: Record<string, unknown>): FloodRiskZoneEvidence["riskLevel"] {
-  if (!attributes) return "moderate";
+export function extractRiskLevel(attributes?: Record<string, unknown>): FloodRiskZoneEvidence["riskLevel"] | null {
+  if (!attributes) return null;
   for (const field of RISK_LEVEL_FIELDS) {
     const value = attributes[field];
     if (typeof value === "string") {
@@ -66,5 +78,5 @@ function extractRiskLevel(attributes?: Record<string, unknown>): FloodRiskZoneEv
       if (normalized.includes("mod")) return "moderate";
     }
   }
-  return "moderate";
+  return null;
 }

@@ -12,15 +12,28 @@ call itself fails, and to a deterministic sandbox reading only in `DEMO_MODE`.
 
 ## Flood-risk geography — Esri ArcGIS
 
-**Real integration, deployment-time layer choice.** `lib/providers/flood-risk-arcgis/live.ts`
-queries whatever ArcGIS FeatureServer/MapServer layer is configured via `ARCGIS_FLOOD_LAYER_URL`,
-using Esri's standard, stable REST query convention (`{layer}/query?geometry=...&f=json`). This
-works with **any** hosted layer — a public ArcGIS Living Atlas flood-hazard layer, a JRC Global
-Flood Hazard Map mirrored to ArcGIS Online, or the team's own uploaded risk polygons — which is why
-the specific layer is an environment variable, not hardcoded: there is no single universal "the
-flood layer" endpoint in real GIS practice. `ARCGIS_API_KEY` is optional and only needed for
-secured layers; many Living Atlas layers are queryable anonymously. Esri is a named hackathon
-sponsor, so wiring this up for real (rather than mocking it) was a deliberate priority.
+**Real integration, live.** `lib/providers/flood-risk-arcgis/live.ts` queries whatever ArcGIS
+FeatureServer/MapServer layer is configured via `ARCGIS_FLOOD_LAYER_URL`, using Esri's standard,
+stable REST query convention (`{layer}/query?geometry=...&f=json`). This works with **any** hosted
+layer — a public ArcGIS Living Atlas flood-hazard layer, a JRC Global Flood Hazard Map mirrored to
+ArcGIS Online, or the team's own uploaded risk polygons — which is why the specific layer is an
+environment variable, not hardcoded: there is no single universal "the flood layer" endpoint in
+real GIS practice. `ARCGIS_API_KEY` is optional and only needed for secured layers; many Living
+Atlas layers are queryable anonymously. Esri is a named hackathon sponsor, so wiring this up for
+real (rather than mocking it) was a deliberate priority.
+
+The layer currently configured is [WRI Aqueduct 3.0's global water-risk atlas](https://www.arcgis.com/home/item.html?id=540abe33f1b84c2a92317d2aab4f33b8)
+(`rfr_*` fields = riverine flood risk, one of several risk types the same layer carries), found via
+the hackathon's own ArcGIS Hub. It's a river-basin-scale model with global coverage, so it correctly
+returns *some* assessed risk level for literally every point on Earth — unlike a hand-drawn hazard
+polygon, "a feature intersects this point" is never a meaningful signal here, so
+`getFloodRiskLive` derives `inRiskZone` from the assessed category (`rfr_label`) instead of mere
+presence when a recognized risk field is found, falling back to presence-based detection for a
+plain binary hazard-zone layer that carries no such field. At Mukuru kwa Reuben's centroid this
+layer currently reads "Low - Medium" — a real result, not a placeholder, and a useful reminder that
+basin-scale riverine models don't capture the localized urban/stormwater flooding informal
+settlements actually face, which is exactly why `historical_base_rate` and
+`ambassador_ground_truth` exist as independent evidence sources rather than deferring to this one.
 
 ## Historical flood records — our own table
 
@@ -80,7 +93,11 @@ plain-language rationale generation — never the classification decision itself
 
 ## Pilot-area boundaries
 
-**Illustrative, clearly marked.** `supabase/seed.sql`'s polygons are ~600m bounding boxes around
-each settlement's approximate real-world centroid, not surveyed ward boundaries. Before production
-use, replace them with real polygons from OpenStreetMap's Nairobi informal-settlements layer or
-community-mapped boundaries from Muungano wa Wanavijiji / SDI Kenya.
+**Real for the 3 active pilot areas.** Mukuru kwa Reuben, Mukuru kwa Njenga, and Viwandani use real
+OpenStreetMap administrative ward boundaries (Kenya IEBC electoral wards "Kwa Reuben"/"Kwa
+Njenga"/"Viwandani", `admin_level=8`; ODbL-licensed, openstreetmap.org/copyright) — not surveyed by
+this project, but genuine third-party administrative geometry rather than an approximation.
+Kibera and Mathare remain **illustrative, clearly marked**: ~600m bounding boxes around each
+settlement's approximate real-world centroid, since both are inactive (Phase 2+) and out of scope
+for this pilot. Replace them the same way (via OpenStreetMap or community-mapped boundaries from
+Muungano wa Wanavijiji / SDI Kenya) before activating either.

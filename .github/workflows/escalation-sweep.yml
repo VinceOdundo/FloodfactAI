@@ -1,0 +1,20 @@
+name: Escalation SLA sweep
+
+on:
+  schedule:
+    # Hourly is enough for a 24h staleness threshold; GitHub Actions cron is
+    # best-effort, not exact — fine here, same as health-check.yml.
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the deployed escalation-sweep endpoint
+        run: |
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "APP_URL secret not set yet — nothing to deploy against. Set it once the app is deployed (see docs/SETUP.md)."
+            exit 0
+          fi
+          curl -fsS -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "${{ secrets.APP_URL }}/api/cron/escalation-sweep"

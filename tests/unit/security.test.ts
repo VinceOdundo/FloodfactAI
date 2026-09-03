@@ -51,21 +51,21 @@ describe("constantTimeEqual", () => {
 });
 
 describe("checkRateLimit", () => {
-  it("allows the first N requests then blocks", () => {
+  it("allows the first N requests then blocks", async () => {
     const key = `test-${Math.random()}`;
     for (let i = 0; i < 5; i++) {
-      expect(checkRateLimit(key).allowed).toBe(true);
+      expect((await checkRateLimit(key)).allowed).toBe(true);
     }
-    const sixth = checkRateLimit(key);
+    const sixth = await checkRateLimit(key);
     expect(sixth.allowed).toBe(false);
     expect(sixth.retryAfterMs).toBeGreaterThan(0);
   });
 
-  it("tracks independent keys separately", () => {
+  it("tracks independent keys separately", async () => {
     const a = `a-${Math.random()}`;
     const b = `b-${Math.random()}`;
-    for (let i = 0; i < 5; i++) checkRateLimit(a);
-    expect(checkRateLimit(a).allowed).toBe(false);
-    expect(checkRateLimit(b).allowed).toBe(true);
+    for (let i = 0; i < 5; i++) await checkRateLimit(a);
+    expect((await checkRateLimit(a)).allowed).toBe(false);
+    expect((await checkRateLimit(b)).allowed).toBe(true);
   });
 });

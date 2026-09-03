@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   const headerList = await headers();
   const ip = headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
 
-  const { allowed, retryAfterMs } = checkRateLimit(`report:${ip}`);
+  const { allowed, retryAfterMs } = await checkRateLimit(`report:${ip}`);
   if (!allowed) {
     return NextResponse.json(
       { error: "Too many reports from this connection. Please wait a few minutes and try again." },
