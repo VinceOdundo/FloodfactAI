@@ -37,10 +37,21 @@ This caught a real bug: the RLS helper functions initially lived in a separate `
 PostgREST doesn't expose by default, so every policy referencing them would have silently denied
 everyone on a real Supabase project. See `docs/ARCHITECTURE.md`.
 
+A second RLS gap was caught the same way, against the real deployed project: `pilot_metrics` is a
+plain view, and a view runs with its *owner's* privileges by default, not the querying user's — so
+it bypassed the exact per-ward scoping the base tables (`reports`, `classifications`, `alerts`)
+enforce, and returned every ward's operational numbers to any authenticated session, not just
+admins. Fixed with `security_invoker` (Postgres 15+), which makes the view re-apply each row's RLS
+as the actual caller. `public_alert_feed` is a second view but is deliberately public (sanitized,
+no `false_information` rows) and needs no such fix.
+
 ## Webhook authenticity
 
 - **WhatsApp**: Meta's `X-Hub-Signature-256` header is verified (`lib/security/hmac.ts`,
   constant-time comparison) against `WHATSAPP_APP_SECRET` before the payload is trusted.
+  `lib/config/env.ts` refuses to boot if a live `WHATSAPP_ACCESS_TOKEN` is configured without
+  `WHATSAPP_APP_SECRET` — a live token with no signing secret would otherwise accept unverified
+  webhook traffic silently.
 - **Africa's Talking**: AT has no request-signing mechanism, so the callback URL configured in
   their dashboard carries a shared secret (`?token=AT_INBOUND_SECRET`), compared in constant time.
 - **Cron**: `/api/cron/*` requires `Authorization: Bearer CRON_SECRET`.
@@ -58,11 +69,12 @@ a production deployment is missing a required secret — it fails closed, not si
 
 ## Rate limiting
 
-The public web-intake route (`/api/reports`) is rate-limited by IP (`lib/security/rate-limit.ts`).
-This is an in-memory sliding window, sufficient for a single-instance pilot deployment; a
-multi-instance production deployment should back it with a Postgres table (each serverless
-instance otherwise keeps its own counter). WhatsApp/SMS intake don't need this — abuse there is
-already bounded by the messaging provider's own account limits.
+The public web-intake route (`/api/reports`) is rate-limited by IP (`lib/security/rate-limit.ts`),
+backed by a Postgres table (`rate_limit_hits`) so the sliding window is correct across any number of
+serverless instances — a plain in-memory map (each instance keeping its own counter) only holds up
+for a single-instance deployment, which is why it's no longer the primary path; it remains as the
+fallback when there's no real database configured (`DEMO_MODE` / local tests). WhatsApp/SMS intake
+don't need this — abuse there is already bounded by the messaging provider's own account limits.
 
 ## What's still a human decision
 

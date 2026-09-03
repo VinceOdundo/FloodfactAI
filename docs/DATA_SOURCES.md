@@ -64,8 +64,8 @@ coverage.
 
 ## Rumor pattern matching — Voyage AI embeddings + pgvector
 
-**Real semantic search when configured, honest lexical fallback otherwise.**
-`lib/providers/embeddings-voyage` calls Voyage's embeddings API; `rumor_patterns.embedding` is a
+**Real semantic search when configured, honest lexical fallback otherwise — live for this
+deployment.** `lib/providers/embeddings-voyage` calls Voyage's embeddings API; `rumor_patterns.embedding` is a
 pgvector column, matched via cosine similarity through the `match_rumor_pattern` SQL function. When
 no Voyage key is configured, `lib/data/rumor-patterns.ts` falls back to token-overlap matching
 against the same `canonical_claim` text — lower recall, but never `embedText()` fabricating a
@@ -81,15 +81,17 @@ schedule, so any fixed default would eventually go stale.
 
 ## SMS — Africa's Talking
 
-**Real.** Kenya's standard SMS/USSD gateway, not a generic international provider — matches how
-Kenyan products actually ship. AT's own "sandbox" username hits a separate test subdomain with real
-API calls to a real test environment.
+**Real, and live for this deployment.** Kenya's standard SMS/USSD gateway, not a generic
+international provider — matches how Kenyan products actually ship. AT's own "sandbox" username
+hits a separate test subdomain with real API calls to a real test environment; that's the mode this
+deployment's credentials are provisioned for. A production account (a real shortcode reaching real
+phones, rather than the sandbox simulator) is the only remaining step before live SMS delivery.
 
 ## Anthropic Claude
 
-**Real, and deliberately scoped.** Used only for structured message understanding and
-plain-language rationale generation — never the classification decision itself. See
-`docs/ARCHITECTURE.md` for why.
+**Real, live for this deployment, and deliberately scoped.** Used only for structured message
+understanding and plain-language rationale generation — never the classification decision itself.
+See `docs/ARCHITECTURE.md` for why.
 
 ## Pilot-area boundaries
 

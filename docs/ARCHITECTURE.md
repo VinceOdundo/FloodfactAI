@@ -140,6 +140,16 @@ a manual dashboard step before any RPC call worked. This was caught and fixed by
 the migrations against a local Postgres during development, not just reading the SQL — see
 `scripts/dev/`.
 
+The same principle caught a second, more consequential bug against the real (non-`DEMO_MODE`)
+Supabase project: PostgREST returns a plain `geography` column as EWKB hex text, not GeoJSON — there
+is no select-string cast that changes that for a base-table column. Every centroid/boundary read in
+this codebase had assumed the GeoJSON shape and was silently parsing to `null`, which meant real
+(non-seed) reports were running the classification pipeline with rainfall and flood-risk evidence
+forced to `unavailable` regardless of actual conditions, since `lib/pipeline/classify.ts`'s point
+resolution came back empty. Caught only by actually running a report through the live pipeline
+against the real database, not by reading the code. Fixed with a small tested EWKB decoder
+(`lib/core/geo-wkb.ts`) used everywhere a `geography` column is read back.
+
 ## Local verification without Docker or a hosted project
 
 This sandbox has no Docker daemon, so `supabase start` isn't available. Instead:

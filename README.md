@@ -9,7 +9,8 @@ ground-truth evidence, reaches a deterministic and fully-tested verdict (**Verif
 Elevated Risk / False Information**), and sends an explainable alert back out — through the
 channels residents already trust.
 
-Built for the AI x City Climate Action Hackathon 2026.
+Built for the AI x City Climate Action Hackathon 2026 by Samuel Mburu Kairu, Vincent Odundo, Alvin
+Nyota, and Amani Maria — Nairobi, Kenya.
 
 ## Why this is built the way it is
 
@@ -22,7 +23,9 @@ plain-language rationale generation) but never to decide whether a warning is re
 
 Every external integration (WhatsApp Cloud API, Africa's Talking SMS, Open-Meteo, Esri ArcGIS,
 Anthropic Claude, Voyage AI) is implemented for real against the real API, with a clearly-labeled
-sandbox fallback when credentials aren't configured yet — see
+sandbox fallback when credentials aren't configured. Today, 4 of those 5 optional integrations are
+actually live for this pilot (Africa's Talking, Anthropic Claude, Voyage AI, and Esri ArcGIS via a
+real WRI Aqueduct flood-risk layer) — only the WhatsApp Cloud API remains to be provisioned. See
 [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md).
 
 ## Quick start
@@ -34,8 +37,9 @@ npm run dev
 ```
 
 Visit `http://localhost:3000`. In demo mode, `/login` lets you preview both the admin
-mission-control dashboard (live map with real pilot-area boundaries, GIS explorer, analytics) and
-the ambassador PWA with no real credentials. `/blog` has the engineering write-up.
+mission-control dashboard (live map with real pilot-area boundaries, a searchable/filterable report
+index, GIS explorer, analytics, ambassador onboarding) and the ambassador PWA with no real
+credentials. `/blog` has the engineering write-up, illustrated per post.
 
 To go live with a real Supabase project (and, optionally, real WhatsApp/SMS/AI credentials), see
 [`docs/SETUP.md`](docs/SETUP.md) — nothing in the code needs to change, only environment variables.
