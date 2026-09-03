@@ -5,16 +5,40 @@ import { GeoJSONSource, MapLibreMap, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { PublicPilotAreaBoundary } from "@/lib/data/queries/public";
 
-// Same OpenFreeMap basemap + graceful fallback pattern as
-// components/admin/live-map.tsx — see that file for why (a real street-level
-// style, not MapLibre's bare demo outline). This is the public,
-// non-operational counterpart: real ward boundaries
+// Same multi-provider basemap + graceful fallback pattern as
+// components/admin/live-map.tsx — see that file for why (real street-level
+// styles, not MapLibre's bare demo outline, raced across two independent
+// providers so one being blocked/down doesn't take the map with it). This is
+// the public, non-operational counterpart: real ward boundaries
 // (supabase/migrations/20260902000100_real_pilot_area_boundaries.sql), no
 // classification/escalation status (that stays admin-only).
-const DEMO_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
+const BASEMAP_STYLES = [
+  "https://tiles.openfreemap.org/styles/positron",
+  "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+];
+const STYLE_PROBE_TIMEOUT_MS = 6000;
 const STYLE_LOAD_TIMEOUT_MS = 15000;
 const SOURCE_ID = "public-pilot-area-boundaries";
 const BRAND_FILL = "#0f6f73";
+
+async function pickReachableStyle(): Promise<string> {
+  const probe = async (url: string) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), STYLE_PROBE_TIMEOUT_MS);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) throw new Error(String(res.status));
+      return url;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  try {
+    return await Promise.any(BASEMAP_STYLES.map(probe));
+  } catch {
+    return BASEMAP_STYLES[0];
+  }
+}
 
 function boundaryFeatureCollection(areas: PublicPilotAreaBoundary[]) {
   return {
@@ -33,35 +57,58 @@ export function PilotAreasMap({ areas }: { areas: PublicPilotAreaBoundary[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const [basemapFailed, setBasemapFailed] = useState(false);
+  // Flips once the map instance exists (after the async reachability probe
+  // resolves) — the boundary-sync effect below keys off this too, since
+  // basemapFailed can stay false the whole time and wouldn't otherwise
+  // re-trigger it once the (previously nonexistent) map instance shows up.
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+    let cancelled = false;
+    let failTimer: ReturnType<typeof setTimeout> | undefined;
 
-    const center: [number, number] = areas.length ? [areas[0].lon, areas[0].lat] : [36.8676, -1.3086];
-    const map = new MapLibreMap({
-      container: containerRef.current,
-      style: DEMO_STYLE_URL,
-      center,
-      zoom: 12.4,
-      interactive: true,
-      attributionControl: { compact: true },
-    });
-    mapRef.current = map;
+    pickReachableStyle().then((styleUrl) => {
+      if (cancelled || !containerRef.current || mapRef.current) return;
 
-    const failTimer = setTimeout(() => setBasemapFailed(true), STYLE_LOAD_TIMEOUT_MS);
-    map.once("load", () => {
-      clearTimeout(failTimer);
-      setBasemapFailed(false);
-    });
-    map.on("error", (e) => {
-      console.error("Map failed to load:", e.error);
-      clearTimeout(failTimer);
-      setBasemapFailed(true);
+      const center: [number, number] = areas.length ? [areas[0].lon, areas[0].lat] : [36.8676, -1.3086];
+      const map = new MapLibreMap({
+        container: containerRef.current,
+        style: styleUrl,
+        center,
+        zoom: 12.4,
+        interactive: true,
+        attributionControl: { compact: true },
+      });
+      mapRef.current = map;
+      setMapReady(true);
+
+      // Only the initial style load counts toward the fallback — see
+      // components/admin/live-map.tsx for why post-load errors (a single
+      // dropped tile/glyph request, routine on real mobile networks) must
+      // not revert an already-working map back to the list fallback.
+      let hasLoaded = false;
+      failTimer = setTimeout(() => {
+        if (!hasLoaded) setBasemapFailed(true);
+      }, STYLE_LOAD_TIMEOUT_MS);
+      map.once("load", () => {
+        hasLoaded = true;
+        clearTimeout(failTimer);
+        setBasemapFailed(false);
+      });
+      map.on("error", (e) => {
+        console.error("Map error:", e.error);
+        if (!hasLoaded) {
+          clearTimeout(failTimer);
+          setBasemapFailed(true);
+        }
+      });
     });
 
     return () => {
+      cancelled = true;
       clearTimeout(failTimer);
-      map.remove();
+      mapRef.current?.remove();
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- map created once
@@ -105,7 +152,7 @@ export function PilotAreasMap({ areas }: { areas: PublicPilotAreaBoundary[] }) {
 
     if (map.isStyleLoaded()) sync();
     else map.once("load", sync);
-  }, [areas, basemapFailed]);
+  }, [areas, basemapFailed, mapReady]);
 
   if (basemapFailed) {
     return (

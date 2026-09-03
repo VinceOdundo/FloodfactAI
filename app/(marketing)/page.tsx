@@ -120,10 +120,10 @@ export default async function HomePage() {
       <section className="flex min-h-screen flex-col justify-center bg-brand-50 px-4 py-20 sm:px-6">
         <div className="mx-auto w-full max-w-5xl">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            <h2 className="font-serif text-3xl font-semibold tracking-tight text-brand-950 sm:text-4xl">
               How it works
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-foreground/70">
+            <p className="mt-4 text-lg leading-relaxed text-brand-900/70">
               Four steps, from a resident&apos;s message to a verified, delivered answer — no manual triage
               bottleneck in between.
             </p>
@@ -230,8 +230,8 @@ function Step({
         {n}
       </div>
       <Icon className="mt-4 h-5 w-5 text-brand-500" aria-hidden="true" />
-      <h3 className="mt-3 text-base font-semibold text-foreground">{title}</h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-foreground/70">{body}</p>
+      <h3 className="mt-3 text-base font-semibold text-brand-950">{title}</h3>
+      <p className="mt-1.5 text-sm leading-relaxed text-brand-900/70">{body}</p>
     </div>
   );
 }
