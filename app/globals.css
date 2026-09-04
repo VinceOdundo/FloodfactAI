@@ -15,8 +15,15 @@
  * everything functional (nav, forms, data). See docs/ARCHITECTURE.md.
  */
 
+/* Field surface is always light — never follows the OS color scheme. A
+   fixed palette here means a token pairing (background + text) can't drift
+   out of sync the way it can when one half of a pair shifts with
+   prefers-color-scheme and the other doesn't. Ops (below) stays forced-dark
+   for the same reason, just at the other end. */
 :root {
-  --background: #ffffff;
+  color-scheme: light;
+
+  --background: #faf7f1;
   --foreground: #10151a;
 
   --brand-50: #eef7f7;
@@ -40,19 +47,12 @@
   --false-info-bg: #f1f5f9;
   --safe: #15803d;
 
+  /* Cards/panels stay clean white so they read as gently elevated above the
+     warm off-white page background, instead of the whole page being one
+     flat, stark white plane. */
   --surface: #ffffff;
-  --surface-muted: #f6f7f8;
-  --border: #e2e5e8;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0d2b27;
-    --foreground: #eef3f1;
-    --surface: #123a34;
-    --surface-muted: #16443d;
-    --border: #1d4038;
-  }
+  --surface-muted: #f2efe6;
+  --border: #e6e1d3;
 }
 
 /* Ops surface: forced dark, regardless of system theme — this is a

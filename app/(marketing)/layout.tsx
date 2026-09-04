@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Code2 } from "lucide-react";
 import { MobileNav } from "@/components/ui/mobile-nav";
+import { Logomark } from "@/components/brand/logo";
 
 const NAV_ITEMS = [
   { href: "/blog", label: "Blog" },
@@ -36,7 +37,8 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="bg-brand-900">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <Link href="/" className="whitespace-nowrap font-serif text-lg font-semibold tracking-tight text-cream">
+          <Link href="/" className="flex items-center gap-2 whitespace-nowrap font-serif text-lg font-semibold tracking-tight text-cream">
+            <Logomark className="h-7 w-7 shrink-0" />
             FloodFact <span className="text-sage">AI</span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium text-cream-dim sm:flex">
@@ -53,7 +55,8 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
       <footer className="bg-brand-950">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-4 sm:px-6">
           <div className="sm:col-span-1">
-            <p className="font-serif text-lg font-semibold text-cream">
+            <p className="flex items-center gap-2 font-serif text-lg font-semibold text-cream">
+              <Logomark className="h-7 w-7 shrink-0" />
               FloodFact <span className="text-sage">AI</span>
             </p>
             <p className="mt-3 text-sm text-cream-dim">

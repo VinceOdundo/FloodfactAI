@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Flood early warning and rumour verification for Nairobi's informal settlements.",
     start_url: "/ambassador",
     display: "standalone",
-    background_color: "#ffffff",
+    background_color: "#faf7f1",
     theme_color: "#0c5a5e",
     icons: [
       { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },

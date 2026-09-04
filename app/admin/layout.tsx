@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/session";
 import { signOut } from "@/lib/actions/auth";
 import { SidebarNav } from "@/components/admin/sidebar-nav";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
+import { Logomark } from "@/components/brand/logo";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
@@ -16,7 +17,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <div data-surface="ops" className="min-h-screen bg-background font-mono text-foreground">
       <div className="flex min-h-screen">
         <aside className="hidden w-56 shrink-0 border-r border-border p-4 sm:block">
-          <Link href="/admin" className="block font-serif text-sm font-semibold tracking-wide text-sage">
+          <Link href="/admin" className="flex items-center gap-2 font-serif text-sm font-semibold tracking-wide text-sage">
+            <Logomark className="h-5 w-5 shrink-0" />
             FloodFact · Ops
           </Link>
           <div className="mt-8">
