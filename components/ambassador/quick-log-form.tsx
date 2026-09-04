@@ -59,7 +59,11 @@ export function QuickLogForm() {
         rows={2}
         className="w-full rounded-xl border border-border bg-surface p-2 text-sm focus:border-brand-500 focus:outline-none"
       />
-      {state.error && <p className="text-sm text-verified">{state.error}</p>}
+      {state.error && (
+        <p role="alert" className="rounded-lg border border-verified/25 bg-verified-bg px-3 py-2.5 text-sm text-verified">
+          {state.error}
+        </p>
+      )}
       <div className="flex gap-2">
         <Button type="submit" disabled={pending} className="flex-1">
           {pending ? "Saving…" : "Save"}

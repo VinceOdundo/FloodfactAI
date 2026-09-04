@@ -53,11 +53,17 @@ export default async function AdminReportsPage(props: PageProps<"/admin/reports"
         <input
           type="search"
           name="q"
+          aria-label="Search report text"
           defaultValue={filters.q ?? ""}
           placeholder="Search text…"
           className="col-span-2 rounded-lg border border-border bg-background p-2 text-sm focus:border-brand-500 focus:outline-none sm:col-span-3 lg:col-span-2"
         />
-        <select name="status" defaultValue={filters.status ?? ""} className="rounded-lg border border-border bg-background p-2 text-sm">
+        <select
+          name="status"
+          aria-label="Filter by status"
+          defaultValue={filters.status ?? ""}
+          className="rounded-lg border border-border bg-background p-2 text-sm"
+        >
           <option value="">Any status</option>
           {STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -67,6 +73,7 @@ export default async function AdminReportsPage(props: PageProps<"/admin/reports"
         </select>
         <select
           name="classification"
+          aria-label="Filter by classification"
           defaultValue={filters.classification ?? ""}
           className="rounded-lg border border-border bg-background p-2 text-sm"
         >
@@ -79,6 +86,7 @@ export default async function AdminReportsPage(props: PageProps<"/admin/reports"
         </select>
         <select
           name="pilotAreaId"
+          aria-label="Filter by pilot area"
           defaultValue={filters.pilotAreaId ?? ""}
           className="rounded-lg border border-border bg-background p-2 text-sm"
         >
@@ -89,8 +97,20 @@ export default async function AdminReportsPage(props: PageProps<"/admin/reports"
             </option>
           ))}
         </select>
-        <input type="date" name="from" defaultValue={filters.from ?? ""} className="rounded-lg border border-border bg-background p-2 text-sm" />
-        <input type="date" name="to" defaultValue={filters.to ?? ""} className="rounded-lg border border-border bg-background p-2 text-sm" />
+        <input
+          type="date"
+          name="from"
+          aria-label="From date"
+          defaultValue={filters.from ?? ""}
+          className="rounded-lg border border-border bg-background p-2 text-sm"
+        />
+        <input
+          type="date"
+          name="to"
+          aria-label="To date"
+          defaultValue={filters.to ?? ""}
+          className="rounded-lg border border-border bg-background p-2 text-sm"
+        />
         <button
           type="submit"
           className="col-span-2 rounded-lg bg-brand-500 px-3 py-2 text-sm font-medium text-white hover:bg-brand-600 sm:col-span-1"

@@ -35,7 +35,11 @@ export function ConfirmFloodingForm({ reportId }: { reportId: string }) {
           </Button>
         </form>
       </div>
-      {state.error && <p className="text-sm text-verified">{state.error}</p>}
+      {state.error && (
+        <p role="alert" className="rounded-lg border border-verified/25 bg-verified-bg px-3 py-2.5 text-sm text-verified">
+          {state.error}
+        </p>
+      )}
     </div>
   );
 }

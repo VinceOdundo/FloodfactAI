@@ -60,7 +60,10 @@ export function ReportForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6"
+    >
       <div>
         <label htmlFor="rawText" className="block text-sm font-medium">
           What are you seeing or hearing? *
@@ -73,7 +76,7 @@ export function ReportForm() {
           maxLength={2000}
           rows={4}
           placeholder="e.g. Water is rising fast near the railway crossing on Kanini Road"
-          className="mt-1.5 w-full rounded-xl border border-border bg-surface p-3 text-base focus:border-brand-500 focus:outline-none"
+          className="mt-1.5 w-full rounded-xl border border-border bg-background p-3 text-base focus:border-brand-500 focus:outline-none"
         />
       </div>
       <div>
@@ -85,7 +88,7 @@ export function ReportForm() {
           name="claimedLocationText"
           maxLength={200}
           placeholder="e.g. Kanini Road, Mukuru kwa Reuben"
-          className="mt-1.5 w-full rounded-xl border border-border bg-surface p-3 text-base focus:border-brand-500 focus:outline-none"
+          className="mt-1.5 w-full rounded-xl border border-border bg-background p-3 text-base focus:border-brand-500 focus:outline-none"
         />
       </div>
       <div>
@@ -97,17 +100,17 @@ export function ReportForm() {
           name="phoneE164"
           type="tel"
           placeholder="+254712345678"
-          className="mt-1.5 w-full rounded-xl border border-border bg-surface p-3 text-base focus:border-brand-500 focus:outline-none"
+          className="mt-1.5 w-full rounded-xl border border-border bg-background p-3 text-base focus:border-brand-500 focus:outline-none"
         />
       </div>
-      {status === "error" && <p className="text-sm text-verified">{errorMessage}</p>}
+      {status === "error" && (
+        <p role="alert" className="rounded-lg border border-verified/25 bg-verified-bg px-3 py-2.5 text-sm text-verified">
+          {errorMessage}
+        </p>
+      )}
       <Button type="submit" size="lg" className="w-full" disabled={status === "submitting"}>
         {status === "submitting" ? "Submitting…" : "Submit report"}
       </Button>
-      <p className="text-xs text-foreground/50">
-        Prefer WhatsApp or SMS? This same system checks messages sent there too — this form is here for
-        anyone who can&apos;t.
-      </p>
     </form>
   );
 }

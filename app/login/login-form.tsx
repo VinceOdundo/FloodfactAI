@@ -35,7 +35,11 @@ export function LoginForm() {
           className="mt-1.5 w-full rounded-xl border border-border bg-surface p-2.5 text-sm focus:border-brand-500 focus:outline-none"
         />
       </div>
-      {state.error && <p className="text-sm text-verified">{state.error}</p>}
+      {state.error && (
+        <p role="alert" className="rounded-lg border border-verified/25 bg-verified-bg px-3 py-2.5 text-sm text-verified">
+          {state.error}
+        </p>
+      )}
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Signing in…" : "Sign in"}
       </Button>
