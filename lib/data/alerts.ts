@@ -1,8 +1,13 @@
 import "server-only";
 import { createServiceClient } from "@/lib/supabase/service";
-import { buildAlertMessage } from "@/lib/core/alert-templates";
+import {
+  buildAlertMessage,
+  buildUnderReviewMessage,
+  pickMessageBody,
+  type MessageLanguage,
+} from "@/lib/core/alert-templates";
 import type { Classification } from "@/lib/core/types";
-import { sendWhatsAppMessage } from "@/lib/providers/whatsapp";
+import { sendWhatsAppMessage, type SendMessageResult } from "@/lib/providers/whatsapp";
 import { sendSmsMessage } from "@/lib/providers/sms-africastalking";
 
 export interface DispatchAlertInput {
@@ -15,6 +20,16 @@ export interface DispatchAlertInput {
   topRationale: string[];
   reporterChannel: "whatsapp" | "sms" | null;
   reporterPhoneE164: string | null;
+  /** Which language to send in. Both bodies are still stored on the alert row. */
+  language: MessageLanguage;
+}
+
+function sendToReporter(
+  channel: "whatsapp" | "sms",
+  phoneE164: string,
+  body: string
+): Promise<SendMessageResult> {
+  return channel === "whatsapp" ? sendWhatsAppMessage(phoneE164, body) : sendSmsMessage(phoneE164, body);
 }
 
 /**
@@ -55,10 +70,11 @@ export async function dispatchAlert(input: DispatchAlertInput): Promise<string> 
   ];
 
   if (input.reporterChannel && input.reporterPhoneE164) {
-    const result =
-      input.reporterChannel === "whatsapp"
-        ? await sendWhatsAppMessage(input.reporterPhoneE164, message.en)
-        : await sendSmsMessage(input.reporterPhoneE164, message.en);
+    const result = await sendToReporter(
+      input.reporterChannel,
+      input.reporterPhoneE164,
+      pickMessageBody(message, input.language)
+    );
     deliveries.push({
       channel: input.reporterChannel,
       status: result.status,
@@ -78,4 +94,43 @@ export async function dispatchAlert(input: DispatchAlertInput): Promise<string> 
     .eq("id", alert.id);
 
   return alert.id;
+}
+
+export interface UnderReviewAcknowledgementInput {
+  pilotAreaName: string;
+  locationDetail: string | null;
+  reporterChannel: "whatsapp" | "sms" | null;
+  reporterPhoneE164: string | null;
+  language: MessageLanguage;
+}
+
+/**
+ * Tells a reporter their report is with a human, on the escalation path where
+ * no verdict alert will be sent.
+ *
+ * Writes no `alerts` or `alert_deliveries` row on purpose: `alerts` rows are
+ * published state (they feed the public feed and the ambassador queue) and an
+ * acknowledgement carries no verdict. `alert_deliveries.alert_id` is NOT NULL,
+ * so there is no way to record the delivery without also publishing an alert —
+ * the send result goes to the audit trail instead, via the caller.
+ *
+ * Returns null when we never captured a contact channel (web reports without a
+ * phone number), which is not an error — there is simply nobody to reach yet.
+ */
+export async function sendUnderReviewAcknowledgement(
+  input: UnderReviewAcknowledgementInput
+): Promise<SendMessageResult | null> {
+  if (!input.reporterChannel || !input.reporterPhoneE164) return null;
+
+  const message = buildUnderReviewMessage({
+    pilotAreaName: input.pilotAreaName,
+    locationDetail: input.locationDetail,
+    issuedAt: new Date(),
+  });
+
+  return sendToReporter(
+    input.reporterChannel,
+    input.reporterPhoneE164,
+    pickMessageBody(message, input.language)
+  );
 }

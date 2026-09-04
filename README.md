@@ -14,6 +14,12 @@ Nyota, and Amani Maria — Nairobi, Kenya.
 
 ## Why this is built the way it is
 
+Two rules govern the outbound side, and both are tested: a resident is answered **in the language
+they wrote in** (Swahili by default, since the pilot wards are Swahili/Sheng dominant), and a
+report that gets escalated to a human still gets an acknowledgement rather than silence — the
+cases the engine is least sure about are exactly the ones where saying nothing is worst. See
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
 The one thing that can't be wrong here is the safety decision. So the classification itself
 (`lib/core/risk-engine.ts`) is a small, deterministic, exhaustively unit-tested rule set — not an
 LLM call. Claude is used elsewhere in the pipeline (structured extraction of the raw message, and

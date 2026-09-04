@@ -87,6 +87,18 @@ export async function updateReportPilotArea(reportId: string, pilotAreaId: strin
   await supabase.from("reports").update({ pilot_area_id: pilotAreaId }).eq("id", reportId);
 }
 
+/**
+ * Persists the language the NLU step detected. `reports.language` has existed
+ * since the first migration and was never written — it's what outbound message
+ * language selection reads, so a report with a null language falls back to the
+ * pilot default instead of the resident's own language.
+ */
+export async function updateReportLanguage(reportId: string, language: string | null): Promise<void> {
+  if (!language) return;
+  const supabase = createServiceClient();
+  await supabase.from("reports").update({ language }).eq("id", reportId);
+}
+
 export async function updateReportStatus(
   reportId: string,
   status: "pending" | "processing" | "classified" | "escalated" | "resolved" | "failed"

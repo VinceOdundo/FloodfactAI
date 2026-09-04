@@ -28,6 +28,9 @@ Resident (WhatsApp / SMS / web / ambassador)
    ├─ Decide        → lib/core/risk-engine.ts (deterministic, see below)
    ├─ Explain       → lib/providers/llm-anthropic (rationale, EN + SW)
    └─ Alert/Escalate → lib/data/alerts.ts, lib/data/reports.ts (escalations)
+        confident verdict → dispatchAlert(), in the reporter's own language
+        escalated         → sendUnderReviewAcknowledgement(), so the reporter
+                            is told a human has it rather than hearing nothing
         │
         ▼
   WhatsApp / SMS reply, ambassador queue, admin dashboard, public alerts feed
@@ -86,6 +89,25 @@ Claude is used exactly twice per report, and never to decide:
 - **Explaining** (`generateRationale`): given the engine's already-decided verdict and evidence
   list, produce a plain-language, bilingual (English/Swahili) explanation. The prompt explicitly
   instructs the model not to change or hedge the verdict — it explains a decision it did not make.
+
+## Nobody is left in silence, and nobody is answered in the wrong language
+
+Two properties of the outbound path are worth stating explicitly, because both
+were latent bugs that the schema had already anticipated and the code did not honor:
+
+- **Escalation is not silence.** When the engine returns `insufficientEvidence` or
+  `conflictingEvidence`, no verdict alert is sent — that is the point of escalating. But the
+  reporter still receives an acknowledgement (`sendUnderReviewAcknowledgement`) saying a trained
+  ambassador is checking. It deliberately carries no verdict and creates no `alerts` row, so it can
+  never reach the public feed; the send result is recorded as an `under_review_acknowledgement`
+  audit event instead. It also promises no response time — `ESCALATION_SLA_HOURS` is a staleness
+  threshold, not a commitment, and an actual response-time promise is a pilot-team policy decision.
+- **Outbound language follows the resident.** `nlu_extractions.language` already recorded the
+  language each message was written in; it is now also persisted to `reports.language` and used to
+  pick the message body. Both `message_en` and `message_sw` are still stored on every alert row.
+  An undetected language resolves to Swahili rather than English (`resolveMessageLanguage`): the
+  Phase-1 wards are Swahili/Sheng dominant, so an unrecognised value is far more likely to be a
+  Swahili variant — and the failure that matters is a warning the recipient cannot read.
 
 ## Mode switch
 

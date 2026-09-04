@@ -10,6 +10,7 @@ import {
   saveClassification,
   saveEvidenceItems,
   saveNluExtraction,
+  updateReportLanguage,
   updateReportPilotArea,
   updateReportStatus,
 } from "@/lib/data/reports";
@@ -17,7 +18,8 @@ import { getPilotAreaById, resolvePilotArea } from "@/lib/data/pilot-areas";
 import { getHistoricalBaseRate } from "@/lib/data/historical";
 import { getAmbassadorGroundTruth } from "@/lib/data/ambassadors";
 import { matchRumorPattern } from "@/lib/data/rumor-patterns";
-import { dispatchAlert } from "@/lib/data/alerts";
+import { dispatchAlert, sendUnderReviewAcknowledgement } from "@/lib/data/alerts";
+import { resolveMessageLanguage } from "@/lib/core/alert-templates";
 import { writeAuditEvent } from "@/lib/data/audit";
 import { getRainfallEvidence } from "@/lib/providers/weather-openmeteo";
 import { getFloodRiskEvidence } from "@/lib/providers/flood-risk-arcgis";
@@ -54,6 +56,9 @@ export async function runClassificationPipeline(reportId: string): Promise<void>
     language: extraction.language,
     urgencySignal: extraction.urgencySignal,
   });
+
+  await updateReportLanguage(reportId, extraction.language);
+  const language = resolveMessageLanguage(extraction.language);
 
   const hazardType: HazardType = (report.hazard_type as HazardType) ?? extraction.hazardTypeGuess;
 
@@ -133,6 +138,33 @@ export async function runClassificationPipeline(reportId: string): Promise<void>
   if (output.insufficientEvidence || output.conflictingEvidence) {
     await createEscalation(reportId, classificationId, output.rationale.join(" "));
     await updateReportStatus(reportId, "escalated");
+
+    // No verdict alert goes out here — that's the whole point of escalating.
+    // But the reporter still gets told a human has it, rather than silence
+    // while the case sits open.
+    const escalatedContact = await getReporterContact(reportId);
+    const ack = await sendUnderReviewAcknowledgement({
+      pilotAreaName: pilotArea?.name ?? "your area",
+      locationDetail: report.claimed_location_text,
+      reporterChannel: escalatedContact?.channel ?? null,
+      reporterPhoneE164: escalatedContact?.phone ?? null,
+      language,
+    });
+
+    await writeAuditEvent({
+      actorType: "system",
+      actorId: "classify-pipeline",
+      action: "under_review_acknowledgement",
+      entityType: "report",
+      entityId: reportId,
+      payload: {
+        // No contact channel captured — nobody to acknowledge to.
+        sent: ack !== null && ack.status === "sent",
+        channel: escalatedContact?.channel ?? null,
+        language,
+        error: ack?.error ?? null,
+      },
+    });
     return;
   }
 
@@ -140,6 +172,7 @@ export async function runClassificationPipeline(reportId: string): Promise<void>
 
   const reporterContact = await getReporterContact(reportId);
   await dispatchAlert({
+    language,
     reportId,
     classificationId,
     classification: output.classification,

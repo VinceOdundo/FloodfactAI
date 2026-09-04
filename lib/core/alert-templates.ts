@@ -7,16 +7,43 @@ export interface AlertContext {
   topRationale: string[];
 }
 
+/** Everything an under-review acknowledgement needs — it carries no verdict, so no rationale. */
+export type UnderReviewContext = Omit<AlertContext, "topRationale">;
+
 export interface AlertMessage {
   en: string;
   sw: string;
 }
+
+export type MessageLanguage = "en" | "sw";
 
 const SOURCE_LINE_EN = "Verified by FloodFact AI.";
 const SOURCE_LINE_SW = "Imethibitishwa na FloodFact AI.";
 
 function formatTime(d: Date): string {
   return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Nairobi" });
+}
+
+function formatPlace(ctx: { pilotAreaName: string; locationDetail?: string | null }): string {
+  return ctx.locationDetail ? `${ctx.locationDetail}, ${ctx.pilotAreaName}` : ctx.pilotAreaName;
+}
+
+/**
+ * Which language to send an outbound message in, given whatever the NLU step
+ * detected (`nlu_extractions.language`, a free-form string from the model).
+ *
+ * Unknown resolves to Swahili rather than English on purpose: the Phase-1
+ * pilot wards are Swahili/Sheng dominant, so an unrecognised or missing value
+ * is far more likely to be a Swahili variant than an English one — and the
+ * failure that actually matters is a flood warning the recipient cannot read.
+ */
+export function resolveMessageLanguage(detected: string | null | undefined): MessageLanguage {
+  if (!detected) return "sw";
+  return detected.trim().toLowerCase().startsWith("en") ? "en" : "sw";
+}
+
+export function pickMessageBody(message: AlertMessage, language: MessageLanguage): string {
+  return language === "sw" ? message.sw : message.en;
 }
 
 /**
@@ -27,7 +54,7 @@ function formatTime(d: Date): string {
  * baseline, not final approved copy.
  */
 export function buildAlertMessage(classification: Classification, ctx: AlertContext): AlertMessage {
-  const place = ctx.locationDetail ? `${ctx.locationDetail}, ${ctx.pilotAreaName}` : ctx.pilotAreaName;
+  const place = formatPlace(ctx);
   const time = formatTime(ctx.issuedAt);
 
   switch (classification) {
@@ -61,4 +88,35 @@ export function buildAlertMessage(classification: Classification, ctx: AlertCont
           `${SOURCE_LINE_SW} Saa: ${time}.`,
       };
   }
+}
+
+/**
+ * Sent when the engine could not reach a confident verdict and the report went
+ * to a human instead. Before this existed, the escalation path returned
+ * without messaging anyone, so the reporter got silence on exactly the cases
+ * still being decided.
+ *
+ * Deliberately NOT an alert: it carries no verdict, so it must never create an
+ * `alerts` row — those feed the public alert feed and the ambassador queue.
+ *
+ * It also states no response time. `ESCALATION_SLA_HOURS` is explicitly a
+ * staleness threshold, not a commitment (see lib/core/escalation-sla.ts), and
+ * an actual response-time promise is a pilot-team policy decision — not
+ * something to invent in a message template. Say a human is looking; don't
+ * promise a clock we haven't agreed to.
+ */
+export function buildUnderReviewMessage(ctx: UnderReviewContext): AlertMessage {
+  const place = formatPlace(ctx);
+  const time = formatTime(ctx.issuedAt);
+
+  return {
+    en:
+      `FloodFact AI received your report about ${place}. We could not confirm it automatically, so a trained ` +
+      `community ambassador is checking it now. We will message you with the result. Avoid flowing water and ` +
+      `low-lying paths until then. Received ${time}.`,
+    sw:
+      `FloodFact AI imepokea ripoti yako kuhusu ${place}. Hatukuweza kuithibitisha moja kwa moja, kwa hivyo ` +
+      `msaidizi wa jamii aliyefunzwa anaiangalia sasa. Tutakutumia jibu. Epuka maji yanayotiririka na njia za ` +
+      `chini hadi hapo. Imepokelewa ${time}.`,
+  };
 }

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildAlertMessage } from "@/lib/core/alert-templates";
+import {
+  buildAlertMessage,
+  buildUnderReviewMessage,
+  pickMessageBody,
+  resolveMessageLanguage,
+} from "@/lib/core/alert-templates";
 
 const ctx = {
   pilotAreaName: "Mukuru kwa Reuben",
@@ -36,5 +41,59 @@ describe("buildAlertMessage", () => {
     const msg = buildAlertMessage("verified_warning", { ...ctx, locationDetail: null });
     expect(msg.en).toContain("Mukuru kwa Reuben");
     expect(msg.en).not.toContain("Kanini Road");
+  });
+});
+
+describe("buildUnderReviewMessage", () => {
+  const reviewCtx = { pilotAreaName: "Mukuru kwa Reuben", locationDetail: "Kanini Road", issuedAt: ctx.issuedAt };
+
+  it("confirms receipt and says a human is checking, in both languages", () => {
+    const msg = buildUnderReviewMessage(reviewCtx);
+    expect(msg.en).toContain("Kanini Road");
+    expect(msg.en).toMatch(/received your report/i);
+    expect(msg.en).toMatch(/ambassador/i);
+    expect(msg.sw).toMatch(/imepokea/i);
+    expect(msg.sw).toMatch(/msaidizi/i);
+  });
+
+  it("states no verdict — it must never read as a confirmation or a dismissal", () => {
+    const msg = buildUnderReviewMessage(reviewCtx);
+    expect(msg.en).not.toMatch(/VERIFIED|FALSE|WARNING/);
+    expect(msg.sw).not.toMatch(/ONYO|SI KWELI/);
+  });
+
+  it("promises no response time — an SLA is a pilot-team decision, not a template's", () => {
+    const msg = buildUnderReviewMessage(reviewCtx);
+    expect(msg.en).not.toMatch(/\d+\s*(minute|min|hour|hr)/i);
+    expect(msg.sw).not.toMatch(/\d+\s*(dakika|saa)/i);
+  });
+});
+
+describe("resolveMessageLanguage", () => {
+  it("uses English only when English is actually detected", () => {
+    expect(resolveMessageLanguage("en")).toBe("en");
+    expect(resolveMessageLanguage("en-KE")).toBe("en");
+    expect(resolveMessageLanguage("English")).toBe("en");
+  });
+
+  it("resolves Swahili and its variants to Swahili", () => {
+    expect(resolveMessageLanguage("sw")).toBe("sw");
+    expect(resolveMessageLanguage("swa")).toBe("sw");
+    expect(resolveMessageLanguage("sw-KE")).toBe("sw");
+  });
+
+  it("defaults unknown or missing detection to Swahili, not English", () => {
+    expect(resolveMessageLanguage(null)).toBe("sw");
+    expect(resolveMessageLanguage(undefined)).toBe("sw");
+    expect(resolveMessageLanguage("")).toBe("sw");
+    expect(resolveMessageLanguage("sheng")).toBe("sw");
+  });
+});
+
+describe("pickMessageBody", () => {
+  it("selects the requested language's body", () => {
+    const msg = buildAlertMessage("verified_warning", ctx);
+    expect(pickMessageBody(msg, "sw")).toBe(msg.sw);
+    expect(pickMessageBody(msg, "en")).toBe(msg.en);
   });
 });
