@@ -1,9 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  AlertTriangle,
+  HelpCircle,
+  Smartphone,
+  Globe,
+  Users,
+  MapPin,
+  Clock,
+  Radio,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ClassificationBadge } from "@/components/classification-badge";
 import { RevealContactButton } from "@/components/admin/reveal-contact-button";
+import { WhatsAppLogo } from "@/components/brand/whatsapp-logo";
 import { getReportDetail } from "@/lib/data/queries/admin";
 
 const QUALITY_ICON: Record<string, typeof CheckCircle2> = {
@@ -12,41 +24,72 @@ const QUALITY_ICON: Record<string, typeof CheckCircle2> = {
   unavailable: HelpCircle,
 };
 
+const CHANNEL_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
+  whatsapp: { label: "WhatsApp", icon: WhatsAppLogo, color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
+  sms: { label: "SMS", icon: Smartphone, color: "text-amber-700", bg: "bg-amber-50 border-amber-200" },
+  web: { label: "Web Portal", icon: Globe, color: "text-sky-700", bg: "bg-sky-50 border-sky-200" },
+  ambassador: { label: "Ambassador", icon: Users, color: "text-purple-700", bg: "bg-purple-50 border-purple-200" },
+};
+
 export default async function ReportDetailPage(props: PageProps<"/admin/reports/[id]">) {
   const { id } = await props.params;
   const report = await getReportDetail(id);
   if (!report) notFound();
 
+  const channel = CHANNEL_CONFIG[report.sourceChannel] ?? CHANNEL_CONFIG.web;
+  const ChannelIcon = channel.icon;
+
   return (
-    <div className="max-w-3xl space-y-4">
-      <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs text-foreground/50 hover:text-foreground">
+    <div className="max-w-4xl space-y-6">
+      <Link href="/admin/reports" className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline">
         <ArrowLeft className="h-3.5 w-3.5" />
-        Back to overview
+        Back to all reports
       </Link>
-      <div>
-        <p className="text-xs uppercase tracking-wide text-foreground/50">Report {report.id.slice(0, 8)}</p>
-        <h1 className="mt-1 text-xl font-semibold">{report.pilotAreaName ?? "Unresolved location"}</h1>
-        <p className="mt-2 text-foreground/80">{report.rawText}</p>
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-foreground/50">
-          <span>Channel: {report.sourceChannel}</span>
-          <span>Hazard type: {report.hazardType}</span>
-          <span>Status: {report.status}</span>
-          <span>{new Date(report.createdAt).toLocaleString()}</span>
+
+      <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-3.5">
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-2xs font-semibold ${channel.bg} ${channel.color}`}>
+              <ChannelIcon className="h-3 w-3 shrink-0" />
+              <span>{channel.label}</span>
+            </span>
+            <span className="text-2xs font-mono text-foreground/40">
+              ID: {report.id.slice(0, 8)}
+            </span>
+          </div>
+          <div className="flex items-center gap-3 text-2xs text-foreground/50">
+            <span className="flex items-center gap-1 font-medium text-brand-700">
+              <MapPin className="h-3 w-3" />
+              {report.pilotAreaName ?? "Mukuru Sector"}
+            </span>
+            <span>·</span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {new Date(report.createdAt).toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-foreground/40">Incoming Signal Text</p>
+          <p className="mt-1.5 text-base font-medium leading-relaxed text-foreground">
+            &ldquo;{report.rawText}&rdquo;
+          </p>
         </div>
       </div>
 
       {report.classification && (
-        <Card>
+        <Card className="p-5">
           <div className="flex items-center justify-between">
             <ClassificationBadge classification={report.classification.classification} />
-            <span className="text-sm text-foreground/60">
-              Confidence: {Math.round(report.classification.confidence * 100)}%
+            <span className="text-xs font-semibold text-foreground/70">
+              Pipeline Confidence: {Math.round(report.classification.confidence * 100)}%
             </span>
           </div>
-          <p className="mt-3 text-sm leading-relaxed">{report.classification.rationaleEn}</p>
+          <p className="mt-3 text-sm leading-relaxed text-foreground/80">{report.classification.rationaleEn}</p>
           {report.classification.insufficientEvidence && (
-            <p className="mt-2 text-xs font-medium text-elevated">
-              Flagged as insufficient evidence — routed for human review rather than a confident verdict.
+            <p className="mt-2.5 rounded-xl border border-amber-500/20 bg-amber-50/60 p-3 text-xs font-medium text-amber-900">
+              Flagged as insufficient evidence: routed for human review rather than a confident automated verdict.
             </p>
           )}
         </Card>
@@ -75,7 +118,7 @@ export default async function ReportDetailPage(props: PageProps<"/admin/reports/
                       {e.quality}
                     </span>
                   </td>
-                  <td className="py-2">{e.numericValue ?? "—"}</td>
+                  <td className="py-2 font-mono text-xs">{e.numericValue !== null ? e.numericValue : "N/A"}</td>
                   <td className="py-2 text-foreground/50">{new Date(e.fetchedAt).toLocaleTimeString()}</td>
                 </tr>
               );

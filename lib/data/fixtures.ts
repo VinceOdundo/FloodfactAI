@@ -35,7 +35,7 @@ export const FIXTURE_PILOT_AREAS = [
     id: "10000000-0000-0000-0000-000000000003",
     slug: "viwandani",
     name: "Viwandani",
-    isActivePilot: true,
+    isActivePilot: false,
     populationEstimate: 40000,
     centroid: [36.858, -1.302] as [number, number],
     boundary: [
@@ -135,19 +135,6 @@ export const FIXTURE_PILOT_METRICS = [
     ambassadorsTrainedPct: 50,
     householdsReachedTotal: 51,
   },
-  {
-    pilotAreaId: "10000000-0000-0000-0000-000000000003",
-    pilotAreaSlug: "viwandani",
-    pilotAreaName: "Viwandani",
-    reportsTotal: 1,
-    falseInformationRatePct: 0,
-    avgVerificationSeconds: 120,
-    alertsTotal: 1,
-    alertsWithin30MinPct: 100,
-    ambassadorsActive: 2,
-    ambassadorsTrainedPct: 50,
-    householdsReachedTotal: 22,
-  },
 ] as const;
 
 export const FIXTURE_PUBLIC_ALERTS = [
@@ -156,16 +143,60 @@ export const FIXTURE_PUBLIC_ALERTS = [
     pilotAreaName: "Mukuru kwa Reuben",
     classification: "verified_warning" as const,
     messageEn:
-      "VERIFIED FLOOD WARNING — Kanini Road area, Mukuru kwa Reuben. Water is rising. Move to higher ground now and avoid the railway crossing. Verified by FloodFact AI.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 175).toISOString(),
+      "VERIFIED FLOOD WARNING — Kanini Road railway crossing, Mukuru kwa Reuben. Water is rising rapidly along drainage culverts. Move to higher ground immediately and avoid the railway crossing. Verified by FloodFact AI.",
+    messageSw:
+      "ONYO LA MAFURIKO YALIYOTHIBITISHWA — Kivuko cha reli cha Kanini Road, Mukuru kwa Reuben. Maji yanapanda kwa kasi kando ya mifereji. Nenda maeneo ya juu mara moja na uepuke kivuko cha reli. Imethibitishwa na FloodFact AI.",
+    landmark: "Kanini Road Railway Crossing",
+    rainfallMmPerHour: 24.5,
+    riverLevelStatus: "Ngong River +1.4m above baseline",
+    ambassadorCount: 3,
+    verificationSpeedSeconds: 84,
+    createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+  },
+  {
+    id: "50000000-0000-0000-0000-000000000002",
+    pilotAreaName: "Mukuru kwa Njenga",
+    classification: "verified_warning" as const,
+    messageEn:
+      "VERIFIED FLOOD WARNING — Likoni Bridge & Ngong River Embankment, Mukuru kwa Njenga. River has breached channel banks. Residents in low-lying structures should evacuate to Kwa Njenga Primary School. Verified by FloodFact AI.",
+    messageSw:
+      "ONYO LA MAFURIKO YALIYOTHIBITISHWA — Daraja la Likoni na kingo za Mto Ngong, Mukuru kwa Njenga. Mto umefurika kingo zake. Wakazi wa nyumba za mabondeni wahamie Shule ya Msingi ya Kwa Njenga mara moja. Imethibitishwa na FloodFact AI.",
+    landmark: "Likoni Bridge & Embankment",
+    rainfallMmPerHour: 22.0,
+    riverLevelStatus: "Ngong River +1.6m (High Hazard)",
+    ambassadorCount: 4,
+    verificationSpeedSeconds: 92,
+    createdAt: new Date(Date.now() - 1000 * 60 * 65).toISOString(),
   },
   {
     id: "50000000-0000-0000-0000-000000000003",
-    pilotAreaName: "Viwandani",
+    pilotAreaName: "Mukuru kwa Njenga",
     classification: "elevated_risk" as const,
     messageEn:
-      "ELEVATED FLOOD RISK — Viwandani, near Likoni Road. Moderate rainfall and drainage blockage reported. Monitor conditions and keep valuables off the floor. Verified by FloodFact AI.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
+      "ELEVATED FLOOD RISK — Mukuru kwa Njenga, near Simba Cool & Mombasa Road culvert. Heavy runoff accumulating with blocked roadside drainage. Keep children and valuables safe indoors. Verified by FloodFact AI.",
+    messageSw:
+      "HATARI YA MAFURIKO INAYOONGEZEKA — Mukuru kwa Njenga, karibu na Simba Cool na mfereji wa Mombasa Road. Maji mengi yanajikusanya kutokana na mifereji iliyoziba. Weka watoto na mali salama ndani. Imethibitishwa na FloodFact AI.",
+    landmark: "Simba Cool / Mombasa Rd Culvert",
+    rainfallMmPerHour: 14.8,
+    riverLevelStatus: "Drainage runoff pooling",
+    ambassadorCount: 2,
+    verificationSpeedSeconds: 110,
+    createdAt: new Date(Date.now() - 1000 * 60 * 115).toISOString(),
+  },
+  {
+    id: "50000000-0000-0000-0000-000000000004",
+    pilotAreaName: "Mukuru kwa Reuben",
+    classification: "elevated_risk" as const,
+    messageEn:
+      "ELEVATED FLOOD RISK — Gatwekera Footbridge path, Mukuru kwa Reuben. Steady rainfall reported with slow-moving water pooling along footpaths. Monitor conditions closely. Verified by FloodFact AI.",
+    messageSw:
+      "HATARI YA MAFURIKO INAYOONGEZEKA — Njia ya daraja la watembea kwa miguu la Gatwekera, Mukuru kwa Reuben. Mvua ya wastani inanyesha na maji yanatuama kwenye njia. Kuwa makini. Imethibitishwa na FloodFact AI.",
+    landmark: "Gatwekera Footbridge Path",
+    rainfallMmPerHour: 11.5,
+    riverLevelStatus: "Normal channel flow (+0.4m)",
+    ambassadorCount: 2,
+    verificationSpeedSeconds: 104,
+    createdAt: new Date(Date.now() - 1000 * 60 * 190).toISOString(),
   },
 ] as const;
 
@@ -207,9 +238,9 @@ export const FIXTURE_REPORTS = [
   {
     id: "30000000-0000-0000-0000-000000000003",
     sourceChannel: "sms",
-    rawText: "Heavy rain since morning, drainage along Mombasa road blocked, water entering some structures in Viwandani",
-    pilotAreaId: "10000000-0000-0000-0000-000000000003",
-    pilotAreaName: "Viwandani",
+    rawText: "Heavy rain since morning, drainage along Mombasa road blocked, water entering some structures in kwa Njenga",
+    pilotAreaId: "10000000-0000-0000-0000-000000000002",
+    pilotAreaName: "Mukuru kwa Njenga",
     hazardType: "flood",
     status: "classified",
     createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
@@ -261,6 +292,6 @@ export const FIXTURE_AMBASSADORS = [
   { id: "20000000-0000-0000-0000-000000000002", fullName: "Brian Otieno", pilotAreaName: "Mukuru kwa Reuben", trainingStatus: "trained" as const, active: true },
   { id: "20000000-0000-0000-0000-000000000003", fullName: "Grace Achieng", pilotAreaName: "Mukuru kwa Njenga", trainingStatus: "trained" as const, active: true },
   { id: "20000000-0000-0000-0000-000000000004", fullName: "Kevin Mwangi", pilotAreaName: "Mukuru kwa Njenga", trainingStatus: "in_progress" as const, active: true },
-  { id: "20000000-0000-0000-0000-000000000005", fullName: "Purity Nekesa", pilotAreaName: "Viwandani", trainingStatus: "trained" as const, active: true },
-  { id: "20000000-0000-0000-0000-000000000006", fullName: "Dennis Kiptoo", pilotAreaName: "Viwandani", trainingStatus: "not_started" as const, active: true },
+  { id: "20000000-0000-0000-0000-000000000005", fullName: "Purity Nekesa", pilotAreaName: "Mukuru kwa Njenga", trainingStatus: "trained" as const, active: true },
+  { id: "20000000-0000-0000-0000-000000000006", fullName: "Dennis Kiptoo", pilotAreaName: "Mukuru kwa Reuben", trainingStatus: "in_progress" as const, active: true },
 ] as const;

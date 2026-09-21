@@ -190,7 +190,7 @@ export const BLOG_POSTS: BlogPost[] = [
     body: [
       {
         type: "p",
-        text: "The Phase 1 pilot plan calls for 10 trained youth ambassadors in each of Mukuru's three wards — kwa Reuben, kwa Njenga, and Viwandani. They are not a customer-support layer bolted onto the software; they are load-bearing.",
+        text: "The Phase 1 pilot plan calls for 10 trained youth ambassadors in each of Mukuru's active wards — kwa Reuben and kwa Njenga. They are not a customer-support layer bolted onto the software; they are load-bearing.",
       },
       { type: "h2", text: "What they actually do" },
       {

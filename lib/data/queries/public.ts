@@ -10,17 +10,36 @@ export interface PublicAlert {
   classification: "verified_warning" | "elevated_risk";
   messageEn: string;
   messageSw: string | null;
+  landmark?: string;
+  rainfallMmPerHour?: number;
+  riverLevelStatus?: string;
+  ambassadorCount?: number;
+  verificationSpeedSeconds?: number;
   createdAt: string;
 }
 
 export async function getPublicAlertFeed(limit = 20): Promise<PublicAlert[]> {
   if (isDemoMode()) {
-    return FIXTURE_PUBLIC_ALERTS.map((a) => ({ ...a, messageSw: null }));
+    return FIXTURE_PUBLIC_ALERTS.map((a) => ({
+      id: a.id,
+      pilotAreaName: a.pilotAreaName,
+      classification: a.classification,
+      messageEn: a.messageEn,
+      messageSw: a.messageSw ?? null,
+      landmark: a.landmark,
+      rainfallMmPerHour: a.rainfallMmPerHour,
+      riverLevelStatus: a.riverLevelStatus,
+      ambassadorCount: a.ambassadorCount,
+      verificationSpeedSeconds: a.verificationSpeedSeconds,
+      createdAt: a.createdAt,
+    }));
   }
   const supabase = createServiceClient();
   const { data } = await supabase
     .from("public_alert_feed")
-    .select("id, pilot_area_name, classification, message_en, message_sw, created_at")
+    .select(
+      "id, pilot_area_name, classification, message_en, message_sw, landmark, rainfall_mm_per_hour, river_level_status, ambassador_count, verification_speed_seconds, created_at"
+    )
     .limit(limit);
   return (data ?? []).map((r) => ({
     id: r.id,
@@ -28,6 +47,11 @@ export async function getPublicAlertFeed(limit = 20): Promise<PublicAlert[]> {
     classification: r.classification,
     messageEn: r.message_en,
     messageSw: r.message_sw,
+    landmark: r.landmark ?? undefined,
+    rainfallMmPerHour: r.rainfall_mm_per_hour ?? undefined,
+    riverLevelStatus: r.river_level_status ?? undefined,
+    ambassadorCount: r.ambassador_count ?? undefined,
+    verificationSpeedSeconds: r.verification_speed_seconds ?? undefined,
     createdAt: r.created_at,
   }));
 }

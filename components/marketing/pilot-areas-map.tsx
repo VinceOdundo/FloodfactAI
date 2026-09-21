@@ -34,6 +34,7 @@ export function PilotAreasMap({ areas }: { areas: PublicPilotAreaBoundary[] }) {
   const mapRef = useRef<LeafletMap | null>(null);
   const leafletModRef = useRef<typeof import("leaflet") | null>(null);
   const boundaryLayerRef = useRef<LeafletGeoJSON | null>(null);
+  const markersRef = useRef<Array<import("leaflet").Marker>>([]);
   const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export function PilotAreasMap({ areas }: { areas: PublicPilotAreaBoundary[] }) {
       if (cancelled || !containerRef.current || mapRef.current) return;
 
       const center: [number, number] = areas.length ? [areas[0].lat, areas[0].lon] : [-1.3086, 36.8676];
-      const map = L.map(containerRef.current, { center, zoom: 12.4 });
+      const map = L.map(containerRef.current, { center, zoom: 13, scrollWheelZoom: false });
       L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 }).addTo(map);
 
       leafletModRef.current = L;
@@ -66,13 +67,42 @@ export function PilotAreasMap({ areas }: { areas: PublicPilotAreaBoundary[] }) {
     if (!map || !L) return;
 
     boundaryLayerRef.current?.remove();
-    boundaryLayerRef.current = L.geoJSON(boundaryFeatureCollection(areas), {
-      style: { color: BRAND_FILL, weight: 2, fillOpacity: 0.25 },
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+
+    const geoJson = L.geoJSON(boundaryFeatureCollection(areas), {
+      style: { color: BRAND_FILL, weight: 2.5, fillOpacity: 0.22 },
       onEachFeature: (feature, layer) => {
-        layer.bindTooltip(feature.properties?.name ?? "", { sticky: true });
+        layer.bindTooltip(
+          `<div style="font-family:system-ui,sans-serif;padding:1px 0"><strong>${feature.properties?.name}</strong><br/><span style="font-size:10px;opacity:0.75;text-transform:uppercase;letter-spacing:0.05em">Active Phase 1 Pilot</span></div>`,
+          { sticky: true }
+        );
       },
     }).addTo(map);
+
+    boundaryLayerRef.current = geoJson;
+
+    // Add pulsing beacon markers at each pilot ward centroid
+    for (const area of areas) {
+      const beaconIcon = L.divIcon({
+        className: "",
+        html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;width:24px;height:24px;">
+          <div style="position:absolute;width:24px;height:24px;border-radius:50%;background:#0f6f73;opacity:0.35;animation:ping 2s cubic-bezier(0,0,0.2,1) infinite;"></div>
+          <div style="width:12px;height:12px;border-radius:50%;background:#0f6f73;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.35);"></div>
+        </div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+      const marker = L.marker([area.lat, area.lon], { icon: beaconIcon })
+        .bindTooltip(`<strong>${area.name}</strong><br/><span style="font-size:10px;color:#0f6f73;font-weight:600">● LIVE MONITORING</span>`, { sticky: true })
+        .addTo(map);
+      markersRef.current.push(marker);
+    }
+
+    if (areas.length > 0 && geoJson.getBounds().isValid()) {
+      map.fitBounds(geoJson.getBounds(), { padding: [40, 40], maxZoom: 14.5 });
+    }
   }, [areas, mapReady]);
 
-  return <div ref={containerRef} className="h-full min-h-[280px] w-full rounded-xl border border-border" />;
+  return <div ref={containerRef} className="h-full min-h-[280px] w-full rounded-xl border border-border shadow-xs" />;
 }

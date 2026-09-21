@@ -1,5 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="20" fill="#0c5a5e"/>
-  <path d="M50 20 C50 20 30 48 30 63 a20 20 0 0 0 40 0 C70 48 50 20 50 20 Z" fill="#ffffff"/>
-  <path d="M38 66 l8 8 16 -18" fill="none" stroke="#0c5a5e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="ff-drop-grad" x1="20" y1="10" x2="80" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="45%" stop-color="#0D9488" />
+      <stop offset="100%" stop-color="#0A474A" />
+    </linearGradient>
+    <linearGradient id="ff-highlight-grad" x1="24" y1="15" x2="48" y2="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Water Droplet Body (No background, pure transparent) -->
+  <path
+    d="M50 8 C50 8 84 46 84 64 A34 34 0 0 1 16 64 C16 46 50 8 50 8 Z"
+    fill="url(#ff-drop-grad)"
+  />
+
+  <!-- Specular highlight for liquid depth -->
+  <path
+    d="M50 14 C50 14 23 48 23 64 C23 72 26 80 32 86 C26 79 23 70 24 60 C25 46 43 23 50 14 Z"
+    fill="url(#ff-highlight-grad)"
+  />
+
+  <!-- Verified Fact Checkmark -->
+  <path
+    d="M34 62 L46 74 L69 45"
+    stroke="#FFFFFF"
+    stroke-width="8.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- AI Early Warning Beacon & Radar Arc -->
+  <circle cx="69" cy="45" r="3.5" fill="#38BDF8" />
+  <path
+    d="M73 40 C76.5 43.5 78 48 78 53"
+    stroke="#67E8F9"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    opacity="0.85"
+  />
 </svg>

@@ -273,15 +273,25 @@ export interface DataSourceHealthRow {
   mode: "live" | "sandbox";
   status: "ok" | "degraded" | "down" | "unknown";
   lastSuccessAt: string | null;
+  lastError: string | null;
 }
 
 export async function getDataSourceHealth(): Promise<DataSourceHealthRow[]> {
   if (isDemoMode()) {
-    return FIXTURE_DATA_SOURCE_HEALTH.map((h) => ({ ...h }));
+    return FIXTURE_DATA_SOURCE_HEALTH.map((h) => ({ ...h, lastError: null }));
   }
   const supabase = await createClient();
-  const { data } = await supabase.from("data_source_health").select("source, mode, status, last_success_at");
-  return (data ?? []).map((h) => ({ source: h.source, mode: h.mode, status: h.status, lastSuccessAt: h.last_success_at }));
+  const { data } = await supabase
+    .from("data_source_health")
+    .select("source, mode, status, last_success_at, last_error")
+    .order("source");
+  return (data ?? []).map((h) => ({
+    source: h.source,
+    mode: h.mode,
+    status: h.status,
+    lastSuccessAt: h.last_success_at,
+    lastError: h.last_error ?? null,
+  }));
 }
 
 export interface ReportDetail extends ReportListItem {

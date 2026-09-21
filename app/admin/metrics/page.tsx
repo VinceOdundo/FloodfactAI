@@ -3,7 +3,7 @@ import { TargetBarChart, ComparisonBarChart } from "@/components/admin/charts";
 import { getPilotMetrics } from "@/lib/data/queries/admin";
 
 function fmtPct(v: number | null): string {
-  return v === null ? "—" : `${v}%`;
+  return v === null ? "Pending" : `${v}%`;
 }
 
 export default async function MetricsPage() {
@@ -13,8 +13,8 @@ export default async function MetricsPage() {
     <div className="max-w-4xl">
       <h1 className="text-xl font-semibold">Pilot metrics</h1>
       <p className="mt-1 text-sm text-foreground/60">
-        Computed live from recorded reports, alerts and ambassador logs — never hand-typed demo numbers
-        (see the <code className="text-xs">pilot_metrics</code> view in supabase/migrations).
+        Computed live from recorded reports, alerts and ambassador logs: authentic database calculations,
+        not static estimates (see the <code className="text-xs">pilot_metrics</code> view in supabase/migrations).
       </p>
 
       {metrics.length > 0 && (
@@ -50,7 +50,7 @@ export default async function MetricsPage() {
             <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
               <Tile label="Reports" value={String(m.reportsTotal)} />
               <Tile label="False info rate" value={fmtPct(m.falseInformationRatePct)} />
-              <Tile label="Avg. verification" value={m.avgVerificationSeconds ? `${Math.round(m.avgVerificationSeconds)}s` : "—"} />
+              <Tile label="Avg. verification" value={m.avgVerificationSeconds ? `${Math.round(m.avgVerificationSeconds)}s` : "Pending"} />
               <Tile label="Alerts sent" value={String(m.alertsTotal)} />
               <Tile label="Alerts within 30 min" value={fmtPct(m.alertsWithin30MinPct)} />
               <Tile label="Ambassadors active" value={String(m.ambassadorsActive)} />

@@ -1,0 +1,11 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="40" fill="#005E95"/>
+  {/* Esri Globe Rings & Latitude / Longitude grid */}
+  <circle cx="100" cy="100" r="62" stroke="#FFFFFF" stroke-width="8" fill="none"/>
+  <ellipse cx="100" cy="100" rx="30" ry="62" stroke="#FFFFFF" stroke-width="7" fill="none"/>
+  <line x1="38" y1="100" x2="162" y2="100" stroke="#FFFFFF" stroke-width="7"/>
+  <path d="M48 68 C 66 80, 134 80, 152 68" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M48 132 C 66 120, 134 120, 152 132" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <polygon points="100,52 110,88 146,100 110,112 100,148 90,112 54,100 90,88" fill="#F8FAFC" opacity="0.95"/>
+  <circle cx="100" cy="100" r="7" fill="#005E95"/>
+</svg>

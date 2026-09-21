@@ -105,14 +105,22 @@ export function LiveMap({
     if (!map || !L) return;
 
     boundaryLayerRef.current?.remove();
-    boundaryLayerRef.current = L.geoJSON(boundaryFeatureCollection(points), {
+    const geoJson = L.geoJSON(boundaryFeatureCollection(points), {
       style: (feature) => ({
         color: feature?.properties?.color ?? REFERENCE_FILL,
-        weight: 1.5,
+        weight: 2,
         fillOpacity: 0.18,
       }),
     }).addTo(map);
-  }, [points, mapReady]);
+    boundaryLayerRef.current = geoJson;
+
+    const activeBounds = L.geoJSON(
+      boundaryFeatureCollection(points.filter((p) => p.isActivePilot))
+    ).getBounds();
+    if (activeBounds.isValid() && compact) {
+      map.fitBounds(activeBounds, { padding: [30, 30], maxZoom: 13.5 });
+    }
+  }, [points, compact, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -123,14 +131,29 @@ export function LiveMap({
     markersRef.current = [];
 
     for (const point of points) {
-      const color = point.latestClassification ? MARKER_COLOR[point.latestClassification] : "#64748b";
+      const color = point.latestClassification ? MARKER_COLOR[point.latestClassification] : "#0c5a5e";
+      const isWarning = point.latestClassification === "verified_warning";
       const icon = L.divIcon({
         className: "",
-        html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 0 2px rgba(0,0,0,0.3)"></div>`,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8],
+        html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;width:24px;height:24px;">
+          ${isWarning ? `<div style="position:absolute;width:24px;height:24px;border-radius:50%;background:${color};opacity:0.4;animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></div>` : ""}
+          <div style="width:16px;height:16px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.35);"></div>
+        </div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
       });
-      const popupHtml = `<strong>${point.name}</strong><br/>${point.latestClassification ? point.latestClassification.replace("_", " ") : "no reports yet"}${point.openEscalations > 0 ? `<br/>${point.openEscalations} open escalation(s)` : ""}`;
+      const classificationBadge = point.latestClassification
+        ? `<span style="display:inline-block;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;background:${color}18;color:${color}">${point.latestClassification.replace("_", " ")}</span>`
+        : `<span style="font-size:11px;color:#64748b">No active reports</span>`;
+
+      const popupHtml = `
+        <div style="font-family:system-ui,-apple-system,sans-serif;padding:2px 0;min-width:180px;">
+          <div style="font-weight:700;font-size:14px;color:#0f172a;margin-bottom:6px;">${point.name}</div>
+          <div style="margin-bottom:6px;">${classificationBadge}</div>
+          ${point.openEscalations > 0 ? `<div style="font-size:12px;color:#b91c1c;font-weight:600;margin-bottom:4px;">⚠ ${point.openEscalations} open escalation(s)</div>` : ""}
+          ${point.populationEstimate != null ? `<div style="font-size:11px;color:#64748b;border-top:1px solid #f1f5f9;padding-top:4px;">Est. Pop: ~${point.populationEstimate.toLocaleString()} residents</div>` : ""}
+        </div>
+      `;
       const marker = L.marker([point.lat, point.lon], { icon }).bindPopup(popupHtml).addTo(map);
       markersRef.current.push(marker);
     }
@@ -139,11 +162,18 @@ export function LiveMap({
       for (const event of historicalEvents) {
         const icon = L.divIcon({
           className: "",
-          html: `<div style="width:14px;height:14px;background:#78716c;border:2px solid white;transform:rotate(45deg);box-shadow:0 0 0 1px rgba(0,0,0,0.25)"></div>`,
+          html: `<div style="width:14px;height:14px;background:#78716c;border:2px solid white;transform:rotate(45deg);box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`,
           iconSize: [14, 14],
           iconAnchor: [7, 7],
         });
-        const popupHtml = `<strong>${event.locationName} — ${event.eventDate}</strong><br/><span style="opacity:0.75">${event.description.slice(0, 140)}${event.description.length > 140 ? "…" : ""}</span><br/><em style="opacity:0.6">${event.source}</em>`;
+        const popupHtml = `
+          <div style="font-family:system-ui,-apple-system,sans-serif;padding:2px 0;max-width:240px;">
+            <div style="font-weight:700;font-size:13px;color:#0f172a;margin-bottom:2px;">${event.locationName}</div>
+            <div style="font-size:11px;color:#64748b;margin-bottom:6px;">${event.eventDate} · <span style="text-transform:capitalize;font-weight:600;color:#b45309;">${event.severity ?? "moderate"}</span></div>
+            <div style="font-size:12px;color:#334155;line-height:1.45;margin-bottom:6px;">${event.description.slice(0, 150)}${event.description.length > 150 ? "…" : ""}</div>
+            <div style="font-size:10px;color:#94a3b8;border-top:1px solid #f1f5f9;padding-top:4px;">Source: ${event.source}</div>
+          </div>
+        `;
         const marker = L.marker([event.lat, event.lon], { icon })
           .bindPopup(popupHtml, { maxWidth: 260 })
           .addTo(map);

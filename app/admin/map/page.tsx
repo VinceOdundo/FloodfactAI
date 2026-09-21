@@ -13,7 +13,7 @@ export default async function AdminMapPage() {
         <p className="mt-1 text-sm text-foreground/60">
           {active.length} active pilot boundar{active.length === 1 ? "y" : "ies"} · {reference.length} reference
           area{reference.length === 1 ? "" : "s"} · {historicalEvents.length} historical incident
-          {historicalEvents.length === 1 ? "" : "s"} — real geometry from pilot_areas.boundary, not
+          {historicalEvents.length === 1 ? "" : "s"}: real boundary polygons from the GIS layer, not
           illustrative pins.
         </p>
       </div>

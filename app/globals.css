@@ -23,8 +23,8 @@
 :root {
   color-scheme: light;
 
-  --background: #faf7f1;
-  --foreground: #10151a;
+  --background: #faf7f2;
+  --foreground: #111827;
 
   --brand-50: #eef7f7;
   --brand-100: #d3ecec;
@@ -35,9 +35,9 @@
   --brand-900: #0d2b27;
   --brand-950: #081d1a;
 
-  --cream: #f5f0e3;
-  --cream-dim: #cddad2;
-  --sage: #6f9c8c;
+  --cream: #fbf9f4;
+  --cream-dim: #cbd5cf;
+  --sage: #568777;
 
   --verified: #b91c1c;
   --verified-bg: #fef2f2;
@@ -47,26 +47,22 @@
   --false-info-bg: #f1f5f9;
   --safe: #15803d;
 
-  /* Cards/panels stay clean white so they read as gently elevated above the
-     warm off-white page background, instead of the whole page being one
-     flat, stark white plane. */
   --surface: #ffffff;
-  --surface-muted: #f2efe6;
-  --border: #e6e1d3;
+  --surface-muted: #f2ede2;
+  --border: #e5ded0;
 }
 
-/* Ops surface: forced dark, regardless of system theme — this is a
-   control-room, not a document, and should read the same for every operator. */
+/* Ops surface: grounded, high-contrast light control room by default */
 [data-surface="ops"] {
-  --background: #081d1a;
-  --foreground: #e9f1ee;
-  --surface: #0d2b27;
-  --surface-muted: #123a34;
-  --border: #1d4038;
-  --verified-bg: #341616;
-  --elevated-bg: #332512;
-  --false-info-bg: #182421;
-  color-scheme: dark;
+  --background: #f6f3eb;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-muted: #ece6d8;
+  --border: #ddd5c4;
+  --verified-bg: #fef2f2;
+  --elevated-bg: #fffbeb;
+  --false-info-bg: #f1f5f9;
+  color-scheme: light;
 }
 
 @theme inline {

@@ -34,6 +34,13 @@ export const metadata: Metadata = {
       "Evidence-based flood alerts and rumour verification for Kibera, Mathare and Mukuru — powered by AI, trusted through people.",
     type: "website",
   },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   manifest: "/manifest.webmanifest",
 };
 

@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { MessageCircleMore } from "lucide-react";
 import { ReportForm } from "./report-form";
 import { ClassificationBadge } from "@/components/classification-badge";
+import { WhatsAppLogo } from "@/components/brand/whatsapp-logo";
 
 export const metadata: Metadata = { title: "Report a Flood or Rumour" };
 
 const VERDICTS = [
   {
     classification: "verified_warning" as const,
-    body: "Multiple sources agree. Act now — move to higher ground, avoid the route named.",
+    body: "Multiple sources agree. Act now: move to higher ground, avoid the route named.",
   },
   {
     classification: "elevated_risk" as const,
@@ -50,12 +50,27 @@ export default function ReportPage() {
             </ul>
           </div>
 
-          <div className="mt-4 flex gap-3 rounded-2xl border border-border bg-surface p-5">
-            <MessageCircleMore className="h-5 w-5 shrink-0 text-brand-500" aria-hidden="true" />
-            <p className="text-sm leading-relaxed text-foreground/70">
-              Already on WhatsApp or SMS? Send the same message there — this system checks those too. This
-              form is here for anyone who can&apos;t.
-            </p>
+          <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-50/40 p-5 space-y-3">
+            <div className="flex items-start gap-3">
+              <WhatsAppLogo className="h-6 w-6 shrink-0" />
+              <div>
+                <h3 className="font-serif text-sm font-semibold text-foreground">
+                  Prefer reporting via WhatsApp?
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-foreground/70">
+                  Forward any voice note, photo, or rumor directly to the FloodFact AI WhatsApp channel for instant telemetry cross-checking.
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://wa.me/254700000000?text=I%20have%20a%20flood%20report%20for%20Mukuru"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] py-2 text-xs font-bold text-brand-950 transition-transform duration-150 hover:scale-[1.02] shadow-2xs"
+            >
+              <WhatsAppLogo className="h-4 w-4" />
+              <span>Send WhatsApp Report</span>
+            </a>
           </div>
         </aside>
       </div>

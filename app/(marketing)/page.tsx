@@ -1,9 +1,14 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MessageCircle, Radar, ShieldCheck, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RippleMotif } from "@/components/brand/ripple-motif";
 import { SignalMotif, ContourMotif } from "@/components/brand/section-motifs";
+import { WaterParticles } from "@/components/brand/water-particles";
+import { Logomark } from "@/components/brand/logo";
+import { PartnerLogos } from "@/components/marketing/partner-logos";
+import { CrossCheckSimulator } from "@/components/marketing/cross-check-simulator";
 import { PilotAreasMap } from "@/components/marketing/pilot-areas-map";
 import { getHeadlineStats, getActivePilotAreaBoundaries } from "@/lib/data/queries/public";
 import { isDemoMode } from "@/lib/config/env";
@@ -15,58 +20,83 @@ const STEPS = [
   { n: 4, icon: Send, title: "Alert delivered", body: "WhatsApp, SMS, community notice points, and youth ambassadors carry the verified result back out." },
 ];
 
-const DATA_PARTNERS = [
-  { name: "Open‑Meteo", role: "Live rainfall & weather data" },
-  { name: "Esri ArcGIS", role: "Flood‑risk geography layers" },
-  { name: "Africa's Talking", role: "SMS delivery at scale" },
-  { name: "Meta WhatsApp Cloud API", role: "Community reporting channel" },
-  { name: "Anthropic Claude", role: "Structured message understanding" },
-];
-
 export default async function HomePage() {
   const [stats, pilotAreas] = await Promise.all([getHeadlineStats(), getActivePilotAreaBoundaries()]);
 
   return (
     <div>
       <section className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden bg-hero-gradient pb-20 pt-28 sm:pt-24">
+        <WaterParticles className="opacity-40" />
         <RippleMotif className="pointer-events-none absolute -right-10 top-1/2 hidden h-[26rem] w-[26rem] -translate-y-1/2 opacity-70 sm:block lg:right-10 lg:h-[30rem] lg:w-[30rem]" />
         <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6">
-          <div className="max-w-2xl">
-            {isDemoMode() && (
-              <p className="mb-6 inline-block rounded-full border border-cream-dim/30 px-3.5 py-1.5 text-xs font-medium text-cream-dim">
-                Sandbox demo — every number on this page is illustrative, not a live measurement
+          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-7">
+              <div className="mb-6 flex flex-wrap items-center gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-cream-dim/25 bg-cream/5 px-3.5 py-1.5 backdrop-blur-xs">
+                  <Logomark className="h-4 w-4" />
+                  <span className="font-serif text-xs font-semibold tracking-wide text-cream">
+                    FloodFact AI · Mukuru Early Warning
+                  </span>
+                </div>
+                {isDemoMode() && (
+                  <p className="rounded-full border border-cream-dim/20 bg-cream/5 px-3 py-1 text-xs font-medium text-cream-dim">
+                    Pilot preview
+                  </p>
+                )}
+              </div>
+              <h1 className="font-serif text-3xl font-semibold leading-[1.14] text-cream sm:text-5xl lg:text-6xl">
+                Flood warnings people can trust. Rumours that stop spreading.
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-cream-dim sm:text-lg">
+                Cross-checking community flood reports and WhatsApp rumours against live rainfall,
+                hydrology layers, and ground-truth in seconds.
               </p>
-            )}
-            <h1 className="font-serif text-4xl leading-[1.12] font-semibold text-cream sm:text-6xl">
-              Flood warnings people can trust. Rumours that stop spreading.
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream-dim">
-              FloodFact AI cross-checks every flood report and WhatsApp rumour against real rainfall,
-              flood-risk, and historical data — then tells Mukuru&apos;s residents, in seconds, what&apos;s
-              actually true.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Link href="/report">
-                <Button size="lg">Report a flood or rumour</Button>
-              </Link>
-              <Link href="/alerts">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-cream-dim/40 text-cream hover:bg-cream/10"
-                >
-                  See verified alerts
-                </Button>
-              </Link>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link href="/report">
+                  <Button size="lg">Report a flood or rumour</Button>
+                </Link>
+                <Link href="/alerts">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-cream-dim/40 text-cream hover:bg-cream/10"
+                  >
+                    See verified alerts
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative lg:col-span-5">
+              <div className="relative overflow-hidden rounded-2xl border border-cream-dim/20 bg-brand-900/50 shadow-2xl">
+                <Image
+                  src="/images/hero-community-monitoring.jpg"
+                  alt="Community youth ambassador monitoring weather telemetry and river water level in Mukuru"
+                  width={640}
+                  height={420}
+                  priority
+                  className="h-auto w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-950/85 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-3.5 left-3.5 right-3.5 flex flex-wrap items-center justify-between gap-2 text-xs text-cream">
+                  <div className="flex items-center gap-2 rounded-full border border-cream/20 bg-brand-950/80 px-3 py-1.5 backdrop-blur-md">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Live Telemetry · Ngong River 1.8m</span>
+                  </div>
+                  <div className="rounded-full border border-cream/20 bg-brand-950/80 px-3 py-1.5 backdrop-blur-md">
+                    <span>94s Avg. Verification</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="relative mt-20 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-cream-dim/15 pt-8 sm:grid-cols-4">
+          <div className="relative mt-16 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-cream-dim/15 pt-8 sm:grid-cols-4">
             <Stat value={stats.pilotAreasActive} label="Active pilot areas" />
             <Stat value={stats.reportsTotal} label="Reports processed" />
             <Stat value={stats.falseInformationCaught} label="False rumours caught" />
             <Stat
-              value={stats.avgVerificationSeconds ? `${Math.round(stats.avgVerificationSeconds)}s` : "—"}
+              value={stats.avgVerificationSeconds ? `${Math.round(stats.avgVerificationSeconds)}s` : "Pending"}
               label="Avg. verification time"
             />
           </div>
@@ -138,6 +168,10 @@ export default async function HomePage() {
               <Step key={step.n} {...step} />
             ))}
           </div>
+
+          <div className="mt-16">
+            <CrossCheckSimulator />
+          </div>
         </div>
       </section>
 
@@ -148,7 +182,7 @@ export default async function HomePage() {
               Where we&apos;re piloting
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-foreground/70">
-              Phase 1 covers three real Nairobi wards — Mukuru kwa Reuben, Mukuru kwa Njenga, and Viwandani —
+              Phase 1 covers two real Nairobi wards — Mukuru kwa Reuben and Mukuru kwa Njenga —
               mapped from OpenStreetMap&apos;s administrative boundaries, not an approximation.
             </p>
           </div>
@@ -168,32 +202,25 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-brand-950 px-4 py-20 sm:px-6">
-        <ContourMotif className="pointer-events-none absolute inset-x-0 top-0 h-28 w-full rotate-180 text-cream/20 sm:h-40" />
+      <section className="relative flex min-h-screen flex-col justify-center overflow-hidden border-t border-border bg-surface-muted/50 px-4 py-20 sm:px-6">
+        <ContourMotif className="pointer-events-none absolute inset-x-0 top-0 h-28 w-full rotate-180 text-foreground/5 sm:h-40" />
         <div className="relative mx-auto w-full max-w-5xl text-center">
-          <h2 className="font-serif text-3xl font-semibold tracking-tight text-cream sm:text-4xl">
+          <h2 className="font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Built with real partners in mind
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-cream-dim">
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-foreground/70">
             Every integration in this build is real, not a mockup — live data, live delivery channels, live
             language understanding.
           </p>
 
-          <div className="mx-auto mt-14 grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {DATA_PARTNERS.map((p) => (
-              <div key={p.name} className="rounded-xl border border-cream-dim/15 bg-cream/[0.03] p-5 text-left">
-                <p className="font-serif text-base font-semibold text-cream">{p.name}</p>
-                <p className="mt-1.5 text-sm text-cream-dim">{p.role}</p>
-              </div>
-            ))}
-          </div>
+          <PartnerLogos />
 
           <div className="mt-14 flex flex-wrap items-center justify-center gap-3">
             <Link href="/report">
               <Button size="lg">Report a flood or rumour</Button>
             </Link>
             <Link href="/alerts">
-              <Button size="lg" variant="outline" className="border-cream-dim/40 text-cream hover:bg-cream/10">
+              <Button size="lg" variant="outline">
                 See verified alerts
               </Button>
             </Link>

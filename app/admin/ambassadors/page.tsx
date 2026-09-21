@@ -24,7 +24,7 @@ export default async function AmbassadorsPage() {
     <div className="max-w-2xl">
       <h1 className="text-xl font-semibold">Youth ambassadors</h1>
       <p className="mt-1 text-sm text-foreground/60">
-        One trained ambassador serves hundreds of households — the human trust layer alongside the AI.
+        One trained ambassador serves hundreds of households, forming the human trust layer alongside the AI pipeline.
       </p>
       <p className="mt-3 text-sm font-medium text-foreground/70">
         {trainedCount} of {ambassadors.length} trained ·{" "}
